@@ -6,6 +6,8 @@ The GO2 camera uses an Ambarella H22 SoC and the firmware has a very similar str
 Ambarella chips (A2, A7, A9, A12, H2 and others) like the GoPro Hero 3, SJCAM SJ7 and SJ8, Xiaomi Yi and Mi, DJI drones and many more.
 See a more detailed list [here](https://en.wikipedia.org/wiki/List_of_Ambarella_products).
 
+But this firmware is different because it also includes the charge case firmware. A detailed explanation of the firmware structure is described in the [docs](docs/README.md).
+
 Disclaimer
 ==========
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND.

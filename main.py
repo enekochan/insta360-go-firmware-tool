@@ -13,79 +13,109 @@ import shutil
 # import mount
 
 MD5_SIZE = 0x10  # 16
-CRC32_SIZE = 0x4  # 4
-
-FIRMWARE_HEADER_SIZE = 0x230  # 560
-FIRMWARE_HEADER_NAME_POSITION = 0x0  # 0
-FIRMWARE_HEADER_NAME_SIZE = 0x20  # 32
-FIRMWARE_HEADER_MAGIC_NUMBER_POSITION = 0x20  # 32
-FIRMWARE_HEADER_MAGIC_NUMBER_SIZE = 0x4  # 4
-FIRMWARE_HEADER_CRC32_POSITION = 0x24  # 36
-FIRMWARE_HEADER_CRC32_SIZE = CRC32_SIZE  # 4
-FIRMWARE_HEADER_ZEROS_POSITION = 0x28  # 40
-FIRMWARE_HEADER_ZEROS_SIZE = 0x8  # 8
-FIRMWARE_HEADER_SECTIONS_TABLE_POSITION = 0x30  # 48
-FIRMWARE_HEADER_SECTIONS_COUNT = 0x10  # 16
-FIRMWARE_HEADER_SECTIONS_SIZE = 0x8  # 8
-FIRMWARE_HEADER_SECTIONS_LENGTH_SIZE = 0x4  # 4
-FIRMWARE_HEADER_SECTIONS_CRC32_SIZE = CRC32_SIZE  # 4
-
-SECTION_HEADER_SIZE = 0x100  # 256
-SECTION_HEADER_CRC32_POSITION = 0x0  # 0
-SECTION_HEADER_CRC32_SIZE = CRC32_SIZE  # 4
-SECTION_HEADER_VERSION_POSITION = 0x4  # 4
-SECTION_HEADER_VERSION_SIZE = 0x4  # 4
-SECTION_HEADER_DATE_POSITION = 0x8  # 8
-SECTION_HEADER_DATE_SIZE = 0x4  # 4
-SECTION_HEADER_LENGTH_POSITION = 0xC  # 12
-SECTION_HEADER_LENGTH_SIZE = 0x4  # 4
-SECTION_HEADER_LOADING_ADDRESS_POSITION = 0x10  # 16
-SECTION_HEADER_LOADING_ADDRESS_SIZE = 0x4  # 4
-SECTION_HEADER_FLAGS_POSITION = 0x14  # 20
-SECTION_HEADER_FLAGS_SIZE = 0x4  # 4
-SECTION_HEADER_MAGIC_NUMBER_POSITION = 0x18  # 24
-SECTION_HEADER_MAGIC_NUMBER_SIZE = 0x4  # 4
-
-FIRMWARE_FOOTER_SIZE = 0xB8  # 184
-FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_POSITION = 0x0  # 0
-FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE = 0x4  # 4
-FIRMWARE_FOOTER_CAMERA_FILE_NAME_POSITION = 0x4  # 4
-FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE = 0x20  # 32
-FIRMWARE_FOOTER_CAMERA_VERSION_POSITION = 0x24  # 36
-FIRMWARE_FOOTER_CAMERA_VERSION_SIZE = 0x20  # 32
-FIRMWARE_FOOTER_CAMERA_MD5_POSITION = 0x44  # 68
-FIRMWARE_FOOTER_CAMERA_MD5_SIZE = MD5_SIZE  # 16
-FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_POSITION = 0x54  # 84
-FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_SIZE = 0x4  # 4
-FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION = 0x58  # 88
-FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE = 0x20  # 32
-FIRMWARE_FOOTER_BOX_VERSION_POSITION = 0x78  # 120
-FIRMWARE_FOOTER_BOX_VERSION_SIZE = 0x20  # 32
-FIRMWARE_FOOTER_BOX_MD5_POSITION = 0x98  # 152
-FIRMWARE_FOOTER_BOX_MD5_SIZE = MD5_SIZE  # 16
-
-ROMFS_HEADER_SIZE = 0x0000A000  # 40960
-ROMFS_FILENAME_SIZE = 0x40  # 64
-ROMFS_FILE_ENTRY_SIZE = ROMFS_FILENAME_SIZE + 4 + 4 + 4  # File name length plus file size, file offset and crc32 = 74
-ROMFS_MAX_FILE_COUNT = int(ROMFS_HEADER_SIZE / ROMFS_FILE_ENTRY_SIZE // 1)  # 40960 header size divided by 64+4+4+4 entry per file in header and rounded down = 538
+CRC32_SIZE = 0x04  # 4
 
 HEADER_MAGIC_NUMBER = b'\xE6\xDF\x32\x87'
 SECTION_MAGIC_NUMBER = b'\x90\xEB\x24\xA3'
-
 RTOS_MAGIC_NUMBER = b'\x34\x00\x00\xEA\x05\x00\x00\xEA'
-RTOS_MAGIC_NUMBER_POSITION = 0x0
+RTOS_MAGIC_NUMBER_POSITION = 0x00
 ROMFS_MAGIC_NUMBER = b'\x8A\x32\xFC\x66'
-ROMFS_MAGIC_NUMBER_POSITION = 0x0
+ROMFS_MAGIC_NUMBER_POSITION = 0x00
 KERNEL_MAGIC_NUMBER = b'\x41\x52\x4D\x64'  # ARMd
 KERNEL_MAGIC_NUMBER_POSITION = 0x38
 EXT2_MAGIC_NUMBER = b'\x53\xEF'
 EXT2_MAGIC_NUMBER_POSITION = 0x438
 DTB_MAGIC_NUMBER = b'\xD0\x0D\xFE\xED'
-DTB_MAGIC_NUMBER_POSITION = 0x0
+DTB_MAGIC_NUMBER_POSITION = 0x00
 
 # CAMERA_FIRMWARE_FILENAME = b'\x49\x6E\x73\x74\x61\x47\x6F\x32\x46\x57\x2E\x62\x69\x6E\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 # BOX_FIRMWARE_FILENAME = b'\x49\x6E\x73\x74\x61\x43\x68\x42\x6F\x78\x46\x57\x2E\x62\x69\x6E\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-FOOTER_SIGNATURE = b'\x57\x46\x4E\x49\x54\x58\x4E\x4F\x02\x00\x00\x00\x00\x00\x00\x00'
+FIRMWARE_FOOTER_SIGNATURE = b'\x57\x46\x4E\x49\x54\x58\x4E\x4F\x02\x00\x00\x00\x00\x00\x00\x00'
+
+FIRMWARE_HEADER_NAME_POSITION = 0x00  # 0
+FIRMWARE_HEADER_NAME_SIZE = 0x20  # 32
+FIRMWARE_HEADER_MAGIC_NUMBER_POSITION = FIRMWARE_HEADER_NAME_POSITION + FIRMWARE_HEADER_NAME_SIZE  # 32
+FIRMWARE_HEADER_MAGIC_NUMBER_SIZE = len(HEADER_MAGIC_NUMBER)  # 4
+FIRMWARE_HEADER_CRC32_POSITION = FIRMWARE_HEADER_MAGIC_NUMBER_POSITION + FIRMWARE_HEADER_MAGIC_NUMBER_SIZE  # 36
+FIRMWARE_HEADER_CRC32_SIZE = CRC32_SIZE  # 4
+FIRMWARE_HEADER_ZEROS_POSITION = FIRMWARE_HEADER_CRC32_POSITION + FIRMWARE_HEADER_CRC32_SIZE  # 40
+FIRMWARE_HEADER_ZEROS_SIZE = 0x08  # 8
+FIRMWARE_HEADER_SECTIONS_TABLE_POSITION = FIRMWARE_HEADER_ZEROS_POSITION + FIRMWARE_HEADER_ZEROS_SIZE  # 48
+FIRMWARE_HEADER_SECTIONS_COUNT = 0x10  # 16
+FIRMWARE_HEADER_SECTIONS_SIZE = 0x08  # 8
+FIRMWARE_HEADER_SECTIONS_LENGTH_SIZE = 0x04  # 4
+FIRMWARE_HEADER_SECTIONS_CRC32_SIZE = CRC32_SIZE  # 4
+FIRMWARE_HEADER_UNKNOWN_SIZE = 0x180  # 384
+FIRMWARE_HEADER_SIZE = FIRMWARE_HEADER_NAME_SIZE +\
+                        FIRMWARE_HEADER_MAGIC_NUMBER_SIZE +\
+                        FIRMWARE_HEADER_CRC32_SIZE +\
+                        FIRMWARE_HEADER_ZEROS_SIZE +\
+                        FIRMWARE_HEADER_SECTIONS_COUNT * FIRMWARE_HEADER_SECTIONS_SIZE +\
+                        FIRMWARE_HEADER_UNKNOWN_SIZE  # 560
+
+SECTION_HEADER_CRC32_POSITION = 0x00  # 0
+SECTION_HEADER_CRC32_SIZE = CRC32_SIZE  # 4
+SECTION_HEADER_VERSION_POSITION = SECTION_HEADER_CRC32_POSITION + SECTION_HEADER_CRC32_SIZE  # 4
+SECTION_HEADER_VERSION_SIZE = 0x04  # 4
+SECTION_HEADER_DATE_POSITION = SECTION_HEADER_VERSION_POSITION + SECTION_HEADER_VERSION_SIZE  # 8
+SECTION_HEADER_DATE_SIZE = 0x04  # 4
+SECTION_HEADER_LENGTH_POSITION = SECTION_HEADER_DATE_POSITION + SECTION_HEADER_DATE_SIZE  # 12
+SECTION_HEADER_LENGTH_SIZE = 0x04  # 4
+SECTION_HEADER_LOADING_ADDRESS_POSITION = SECTION_HEADER_LENGTH_POSITION + SECTION_HEADER_LENGTH_SIZE  # 16
+SECTION_HEADER_LOADING_ADDRESS_SIZE = 0x04  # 4
+SECTION_HEADER_FLAGS_POSITION = SECTION_HEADER_LOADING_ADDRESS_POSITION + SECTION_HEADER_LOADING_ADDRESS_SIZE  # 20
+SECTION_HEADER_FLAGS_SIZE = 0x04  # 4
+SECTION_HEADER_MAGIC_NUMBER_POSITION = SECTION_HEADER_FLAGS_POSITION + SECTION_HEADER_FLAGS_SIZE  # 24
+SECTION_HEADER_MAGIC_NUMBER_SIZE = 0x04  # 4
+SECTION_HEADER_ZEROS_SIZE = 0xE4  # 228
+SECTION_HEADER_SIZE = SECTION_HEADER_CRC32_SIZE +\
+                       SECTION_HEADER_VERSION_SIZE +\
+                       SECTION_HEADER_DATE_SIZE +\
+                       SECTION_HEADER_LENGTH_SIZE +\
+                       SECTION_HEADER_LOADING_ADDRESS_SIZE +\
+                       SECTION_HEADER_FLAGS_SIZE +\
+                       SECTION_HEADER_MAGIC_NUMBER_SIZE +\
+                       SECTION_HEADER_ZEROS_SIZE  # 256
+
+FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_POSITION = 0x00  # 0
+FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE = 0x04  # 4
+FIRMWARE_FOOTER_CAMERA_FILE_NAME_POSITION = FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_POSITION + FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE  # 4
+FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_CAMERA_VERSION_POSITION = FIRMWARE_FOOTER_CAMERA_FILE_NAME_POSITION + FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE  # 36
+FIRMWARE_FOOTER_CAMERA_VERSION_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_CAMERA_MD5_POSITION = FIRMWARE_FOOTER_CAMERA_VERSION_POSITION + FIRMWARE_FOOTER_CAMERA_VERSION_SIZE  # 68
+FIRMWARE_FOOTER_CAMERA_MD5_SIZE = MD5_SIZE  # 16
+FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_POSITION = FIRMWARE_FOOTER_CAMERA_MD5_POSITION + FIRMWARE_FOOTER_CAMERA_MD5_SIZE  # 84
+FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_SIZE = 0x04  # 4
+FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION = FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_POSITION + FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_SIZE  # 88
+FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_BOX_VERSION_POSITION = FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION + FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE  # 120
+FIRMWARE_FOOTER_BOX_VERSION_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_BOX_MD5_POSITION = FIRMWARE_FOOTER_BOX_VERSION_POSITION + FIRMWARE_FOOTER_BOX_VERSION_SIZE  # 152
+FIRMWARE_FOOTER_BOX_MD5_SIZE = MD5_SIZE  # 16
+FIRMWARE_FOOTER_SIZE = FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_VERSION_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_MD5_SIZE +\
+                        FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_SIZE +\
+                        FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE +\
+                        FIRMWARE_FOOTER_BOX_VERSION_SIZE +\
+                        FIRMWARE_FOOTER_BOX_MD5_SIZE +\
+                        len(FIRMWARE_FOOTER_SIGNATURE)  # 184
+
+ROMFS_HEADER_SIZE = 0x0000A000  # 40960
+ROMFS_FILECOUNT_POSITION = len(ROMFS_MAGIC_NUMBER)  # 4
+ROMFS_FILECOUNT_SIZE = 0x04
+ROMFS_FILE_FILENAME_POSITION = 0x00
+ROMFS_FILE_FILENAME_SIZE = 0x40  # 64
+ROMFS_FILE_LENGTH_POSITION = ROMFS_FILE_FILENAME_POSITION + ROMFS_FILE_FILENAME_SIZE
+ROMFS_FILE_LENGTH_SIZE = 0x04
+ROMFS_FILE_OFFSET_POSITION = ROMFS_FILE_LENGTH_POSITION + ROMFS_FILE_LENGTH_SIZE
+ROMFS_FILE_OFFSET_SIZE = 0x04
+ROMFS_FILE_CRC32_POSITION = ROMFS_FILE_OFFSET_POSITION + ROMFS_FILE_OFFSET_SIZE
+ROMFS_FILE_CRC32_SIZE = CRC32_SIZE
+ROMFS_FILE_ENTRY_SIZE = ROMFS_FILE_FILENAME_SIZE + ROMFS_FILE_LENGTH_SIZE + ROMFS_FILE_OFFSET_SIZE + ROMFS_FILE_CRC32_SIZE  # File name length plus file size, file offset and crc32 = 76
+ROMFS_MAX_FILE_COUNT = int(ROMFS_HEADER_SIZE / ROMFS_FILE_ENTRY_SIZE // 1)  # 40960 header size divided by 64+4+4+4 entry per file in header and rounded down = 538
 
 
 def read(f, offset, length):
@@ -115,7 +145,7 @@ def calculate_md5(f, start, length):
 def calculate_crc32(f, start, length, value=0):
     f.seek(start)
     content = f.read(length)
-    return zlib.crc32(content, value).to_bytes(4, 'little')
+    return zlib.crc32(content, value).to_bytes(CRC32_SIZE, 'little')
 
 
 class HeaderSection:
@@ -167,25 +197,26 @@ class RomFs:
         romfs = open(origin, 'r+b')
         romfs_mm = mmap.mmap(romfs.fileno(), 0)
         romfs_mm.seek(0)
-        romfs_magic_number = read(romfs_mm, 0, 4)
+        romfs_magic_number = read(romfs_mm, ROMFS_MAGIC_NUMBER_POSITION, len(ROMFS_MAGIC_NUMBER))
         if romfs_magic_number != ROMFS_MAGIC_NUMBER:
             print('Invalid ROMFS magic number detected, skipping...')
         else:
             print('Detected ROMFS section, unpacking...')
-            romfs_file_count = read(romfs_mm, 4, 4)
+            romfs_file_count = read(romfs_mm, ROMFS_FILECOUNT_POSITION, ROMFS_FILECOUNT_SIZE)
             romfs_file_count = int.from_bytes(romfs_file_count, 'little')
             print('ROMFS contains ' + str(romfs_file_count) + ' files')
             os.mkdir(destiny)
             for j in range(0, romfs_file_count):
-                file_name = read(romfs_mm, 8 + j * ROMFS_FILE_ENTRY_SIZE, ROMFS_FILENAME_SIZE).decode('utf-8').rstrip('\0')
+                file_entry_base_position = (len(ROMFS_MAGIC_NUMBER) + ROMFS_FILECOUNT_SIZE) + j * ROMFS_FILE_ENTRY_SIZE
+                file_name = read(romfs_mm, file_entry_base_position + ROMFS_FILE_FILENAME_POSITION, ROMFS_FILE_FILENAME_SIZE).decode('utf-8').rstrip('\0')
                 # print('Extracting ' + file_name)
-                file_size = int.from_bytes(
-                    read(romfs_mm, 8 + j * ROMFS_FILE_ENTRY_SIZE + ROMFS_FILENAME_SIZE + 0, 4), 'little')
+                file_length = int.from_bytes(
+                    read(romfs_mm, file_entry_base_position + ROMFS_FILE_LENGTH_POSITION, ROMFS_FILE_LENGTH_SIZE), 'little')
                 file_offset = int.from_bytes(
-                    read(romfs_mm, 8 + j * ROMFS_FILE_ENTRY_SIZE + ROMFS_FILENAME_SIZE + 4, 4), 'little')
-                file_crc32 = read(romfs_mm, 8 + j * ROMFS_FILE_ENTRY_SIZE + ROMFS_FILENAME_SIZE + 8, 4)
-                file_content = read(romfs_mm, file_offset, file_size)
-                file_content_crc32 = calculate_crc32(romfs_mm, file_offset, file_size)
+                    read(romfs_mm, file_entry_base_position + ROMFS_FILE_OFFSET_POSITION, ROMFS_FILE_OFFSET_SIZE), 'little')
+                file_crc32 = read(romfs_mm, file_entry_base_position + ROMFS_FILE_CRC32_POSITION, ROMFS_FILE_CRC32_SIZE)
+                file_content = read(romfs_mm, file_offset, file_length)
+                file_content_crc32 = calculate_crc32(romfs_mm, file_offset, file_length)
                 if file_crc32 != file_content_crc32:
                     print('Invalid file CRC32, skipping...')
                     continue
@@ -216,29 +247,29 @@ class RomFs:
 
         # Check file names are max 64 characters in length
         for f in self.files:
-            if len(f[0]) > ROMFS_FILENAME_SIZE:
-                print('File name {} too long. Max file name length is {:d}'.format(f[1], ROMFS_FILENAME_SIZE))
+            if len(f[0]) > ROMFS_FILE_FILENAME_SIZE:
+                print('File name {} too long. Max file name length is {:d}'.format(f[1], ROMFS_FILE_FILENAME_SIZE))
                 return
 
         # Create ROMFS header
         output_file = open(output, 'wb')
         output_file.write(ROMFS_MAGIC_NUMBER)
-        output_file.write(len(self.files).to_bytes(4, 'little'))
+        output_file.write(len(self.files).to_bytes(ROMFS_FILECOUNT_SIZE, 'little'))
         file_offset = ROMFS_HEADER_SIZE  # First file offset is header size
         for f in self.files:
             # File name with leading nulls up to 64 characters
-            file_name = f[0] + ('\0' * (ROMFS_FILENAME_SIZE - len(f[0])))
+            file_name = f[0] + ('\0' * (ROMFS_FILE_FILENAME_SIZE - len(f[0])))
             output_file.write(bytes(file_name, encoding='utf8'))
             # File size
             file_size = len(f[1])
-            output_file.write(file_size.to_bytes(4, 'little'))
+            output_file.write(file_size.to_bytes(ROMFS_FILE_LENGTH_SIZE, 'little'))
             # File data offset
-            output_file.write(file_offset.to_bytes(4, 'little'))
+            output_file.write(file_offset.to_bytes(ROMFS_FILE_OFFSET_SIZE, 'little'))
             file_offset += file_size  # Prepare the offset for next file with current file size plus previous offset
             file_offset += 2048 - (file_size % 2048)  # Round to the next 2048 block
             # File CRC32
             file_crc32 = zlib.crc32(f[1], 0)
-            output_file.write(file_crc32.to_bytes(4, 'little'))
+            output_file.write(file_crc32.to_bytes(ROMFS_FILE_CRC32_SIZE, 'little'))
         header_leading_null = '\0' * (ROMFS_HEADER_SIZE - (8 + len(self.files) * ROMFS_FILE_ENTRY_SIZE))
         output_file.write(bytes(header_leading_null, encoding='utf8'))
         # Write ROMFS content with files content
@@ -311,7 +342,7 @@ class Firmware:
                                  FIRMWARE_HEADER_SECTIONS_CRC32_SIZE)
             # CRC32 has to be inverted to compare it later with running CRC32 (a running CRC32 uses the previous CRC32 as base value)
             section_crc32_inverse = 0xffffffff ^ int.from_bytes(section_crc32, 'big')
-            section_crc32_inverse = section_crc32_inverse.to_bytes(4, 'little')
+            section_crc32_inverse = section_crc32_inverse.to_bytes(FIRMWARE_HEADER_SECTIONS_CRC32_SIZE, 'little')
 
             # The section 5 has crc32 but no length, so we get it from the section's header itself
             if section_crc32 != b'\x00\x00\x00\x00' and section_length == b'\x00\x00\x00\x00':
@@ -320,7 +351,7 @@ class Firmware:
                                       offset - (SECTION_HEADER_CRC32_SIZE + SECTION_HEADER_VERSION_SIZE + SECTION_HEADER_DATE_SIZE),
                                       SECTION_HEADER_LENGTH_SIZE)
                 section_length = int.from_bytes(section_length, 'little') + SECTION_HEADER_SIZE  # The length in the section header does not count the header itself
-                section_length = section_length.to_bytes(4, 'little')
+                section_length = section_length.to_bytes(SECTION_HEADER_LENGTH_SIZE, 'little')
 
             end = start + int.from_bytes(section_length, 'little')
 
@@ -458,8 +489,8 @@ class Firmware:
             exit(1)
 
         # Check that the firmware ends with the appropriate signature
-        footer_signature = read(self.mm, self.file_size - len(FOOTER_SIGNATURE), len(FOOTER_SIGNATURE))
-        if not footer_signature == FOOTER_SIGNATURE:
+        footer_signature = read(self.mm, self.file_size - len(FIRMWARE_FOOTER_SIGNATURE), len(FIRMWARE_FOOTER_SIGNATURE))
+        if not footer_signature == FIRMWARE_FOOTER_SIGNATURE:
             print('Invalid footer signature')
             exit(1)
 
@@ -580,7 +611,7 @@ class Firmware:
             header_file.seek(SECTION_HEADER_CRC32_POSITION)
             header_file.write(section_crc32)
             header_file.seek(SECTION_HEADER_LENGTH_POSITION)
-            header_file.write(section_size.to_bytes(4, 'little'))
+            header_file.write(section_size.to_bytes(SECTION_HEADER_LENGTH_SIZE, 'little'))
             header_file.close()
             # Append header and section to firmware
             header_file = open(temp_directory + os.sep + 'section_' + str(i) + '.header', 'rb')
@@ -604,12 +635,12 @@ class Firmware:
             section_size = os.fstat(section_file.fileno()).st_size
             sections_running_crc32 = calculate_crc32(section_file, 0, section_size, int.from_bytes(sections_running_crc32, 'little'))
             sections_running_crc32_inverse = 0xffffffff ^ int.from_bytes(sections_running_crc32, 'little')
-            section_crc32 = sections_running_crc32_inverse.to_bytes(4, 'little')
+            section_crc32 = sections_running_crc32_inverse.to_bytes(FIRMWARE_HEADER_SECTIONS_CRC32_SIZE, 'little')
             firmware_file.seek(FIRMWARE_HEADER_SECTIONS_TABLE_POSITION + (i * FIRMWARE_HEADER_SECTIONS_SIZE))
             if read(section_file, DTB_MAGIC_NUMBER_POSITION + SECTION_HEADER_SIZE, len(DTB_MAGIC_NUMBER)) != DTB_MAGIC_NUMBER:
-                firmware_file.write(section_size.to_bytes(4, 'little'))
+                firmware_file.write(section_size.to_bytes(FIRMWARE_HEADER_SECTIONS_LENGTH_SIZE, 'little'))
             else:
-                firmware_file.write(0x00000000.to_bytes(4, 'little'))  # Section 5 (DTB) size is stored always as 0x00000000
+                firmware_file.write(0x00000000.to_bytes(FIRMWARE_HEADER_SECTIONS_LENGTH_SIZE, 'little'))  # Section 5 (DTB) size is stored always as 0x00000000
             firmware_file.write(section_crc32)
             firmware_file.flush()
 

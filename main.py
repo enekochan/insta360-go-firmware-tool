@@ -28,9 +28,10 @@ EXT2_MAGIC_NUMBER_POSITION = 0x438
 DTB_MAGIC_NUMBER = b'\xD0\x0D\xFE\xED'
 DTB_MAGIC_NUMBER_POSITION = 0x00
 
-# CAMERA_FIRMWARE_FILENAME = b'\x49\x6E\x73\x74\x61\x47\x6F\x32\x46\x57\x2E\x62\x69\x6E\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-# BOX_FIRMWARE_FILENAME = b'\x49\x6E\x73\x74\x61\x43\x68\x42\x6F\x78\x46\x57\x2E\x62\x69\x6E\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-FIRMWARE_FOOTER_SIGNATURE = b'\x57\x46\x4E\x49\x54\x58\x4E\x4F\x02\x00\x00\x00\x00\x00\x00\x00'
+FIRMWARE_FOOTER_GO2_SIGNATURE = b'\x57\x46\x4E\x49\x54\x58\x4E\x4F\x02\x00\x00\x00\x00\x00\x00\x00'
+FIRMWARE_FOOTER_GO3_SIGNATURE = b'\x57\x46\x4E\x49\x55\x58\x4E\x4F\x04\x00\x01\x00\x00\x00\x09\x00'
+FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE = len(FIRMWARE_FOOTER_GO2_SIGNATURE)
+FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE = len(FIRMWARE_FOOTER_GO3_SIGNATURE)
 
 FIRMWARE_HEADER_NAME_POSITION = 0x00  # 0
 FIRMWARE_HEADER_NAME_SIZE = 0x20  # 32
@@ -93,7 +94,24 @@ FIRMWARE_FOOTER_BOX_VERSION_POSITION = FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION + 
 FIRMWARE_FOOTER_BOX_VERSION_SIZE = 0x20  # 32
 FIRMWARE_FOOTER_BOX_MD5_POSITION = FIRMWARE_FOOTER_BOX_VERSION_POSITION + FIRMWARE_FOOTER_BOX_VERSION_SIZE  # 152
 FIRMWARE_FOOTER_BOX_MD5_SIZE = MD5_SIZE  # 16
-FIRMWARE_FOOTER_SIZE = FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE +\
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_POSITION = FIRMWARE_FOOTER_BOX_MD5_POSITION + FIRMWARE_FOOTER_BOX_MD5_SIZE  # 84
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE = 0x04  # 4
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_POSITION = FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_POSITION + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE  # 88
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_POSITION = FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_POSITION + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_SIZE  # 120
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_POSITION = FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_POSITION + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_SIZE  # 152
+FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_SIZE = MD5_SIZE  # 16
+FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_POSITION = FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_POSITION + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_SIZE  # 84
+FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE = 0x04  # 4
+FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_POSITION = FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_POSITION + FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE  # 88
+FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_POSITION = FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_POSITION + FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_SIZE  # 120
+FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_SIZE = 0x20  # 32
+FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_POSITION = FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_POSITION + FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_SIZE  # 152
+FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_SIZE = MD5_SIZE  # 16
+
+FIRMWARE_FOOTER_GO2_SIZE = FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE +\
                         FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE +\
                         FIRMWARE_FOOTER_CAMERA_VERSION_SIZE +\
                         FIRMWARE_FOOTER_CAMERA_MD5_SIZE +\
@@ -101,7 +119,25 @@ FIRMWARE_FOOTER_SIZE = FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE +\
                         FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE +\
                         FIRMWARE_FOOTER_BOX_VERSION_SIZE +\
                         FIRMWARE_FOOTER_BOX_MD5_SIZE +\
-                        len(FIRMWARE_FOOTER_SIGNATURE)  # 184
+                        FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE  # 184
+
+FIRMWARE_FOOTER_GO3_SIZE = FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_VERSION_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_MD5_SIZE +\
+                        FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_SIZE +\
+                        FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE +\
+                        FIRMWARE_FOOTER_BOX_VERSION_SIZE +\
+                        FIRMWARE_FOOTER_BOX_MD5_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_SIZE +\
+                        FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_SIZE +\
+                        FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE +\
+                        FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_SIZE +\
+                        FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_SIZE +\
+                        FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_SIZE +\
+                        FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE  # 352
 
 ROMFS_HEADER_SIZE = 0x0000A000  # 40960
 ROMFS_FILECOUNT_POSITION = len(ROMFS_MAGIC_NUMBER)  # 4
@@ -294,15 +330,26 @@ class Firmware:
     firmware_header_zeros = None
     header_sections = None
     sections = None
+    is_go2 = False
+    is_go3 = False
+    footer_size = 0
     camera_firmware_middle_md5 = None
     camera_firmware_size = None
     camera_firmware_filename = None
     camera_firmware_version = None
     camera_firmware_footer_md5 = None
+    camera_bluetooth_firmware_size = None
+    camera_bluetooth_firmware_filename = None
+    camera_bluetooth_firmware_version = None
+    camera_bluetooth_firmware_footer_md5 = None
     box_firmware_size = None
     box_firmware_filename = None
     box_firmware_version = None
     box_firmware_footer_md5 = None
+    box_bluetooth_firmware_size = None
+    box_bluetooth_firmware_filename = None
+    box_bluetooth_firmware_version = None
+    box_bluetooth_firmware_footer_md5 = None
 
     def __init__(self, firmware_path):
         self.firmware_path = firmware_path
@@ -313,6 +360,7 @@ class Firmware:
             self.mm.seek(0)
             self.sections = []
             self.header_sections = []
+            self.get_insta360_go_version()
             self.read_header()
             self.read_footer()
             self.read_middle_md5()
@@ -320,6 +368,22 @@ class Firmware:
     def __del__(self):
         if self.fw is not None:
             self.fw.close()
+
+    def get_insta360_go_version(self):
+        # Is it a Insta360 GO 2 firmware?
+        footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
+        if footer_signature == FIRMWARE_FOOTER_GO2_SIGNATURE:
+            self.is_go2 = True
+            self.footer_size = FIRMWARE_FOOTER_GO2_SIZE
+        # Is it a Insta360 GO 3 firmware?
+        footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
+        if footer_signature == FIRMWARE_FOOTER_GO3_SIGNATURE:
+            self.is_go3 = True
+            self.footer_size = FIRMWARE_FOOTER_GO3_SIZE
+        # Is it none?
+        if not self.is_go2 and not self.is_go3:
+            print('Only Insta360 GO 2 and Insta360 GO 3 cameras are supported')
+            sys.exit(1)
 
     def read_header(self):
         self.firmware_header_name = read(self.mm, FIRMWARE_HEADER_NAME_POSITION, FIRMWARE_HEADER_NAME_SIZE).decode('utf-8').rstrip('\0')
@@ -382,42 +446,85 @@ class Firmware:
         # Get camera and box firmware size from the footer
         self.camera_firmware_size = int.from_bytes(
             read(self.mm,
-                 self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_POSITION,
+                 self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_POSITION,
                  FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_SIZE), 'little')
         self.box_firmware_size = int.from_bytes(
             read(self.mm,
-                 self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_POSITION,
+                 self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_POSITION,
                  FIRMWARE_FOOTER_BOX_FIRMWARE_LENGTH_SIZE), 'little')
+        if self.is_go3:
+            self.camera_bluetooth_firmware_size = int.from_bytes(
+                read(self.mm,
+                     self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_POSITION,
+                     FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE), 'little')
+            self.box_bluetooth_firmware_size = int.from_bytes(
+                read(self.mm,
+                     self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_POSITION,
+                     FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE), 'little')
+        else:
+            self.camera_bluetooth_firmware_size = 0
+            self.box_bluetooth_firmware_size = 0
+
         print('Camera firmware size: ' + str(self.camera_firmware_size))
         print('Box firmware size: ' + str(self.box_firmware_size))
-        print('Footer size: ' + str(FIRMWARE_FOOTER_SIZE))
-        print('Total size: ' + str(self.camera_firmware_size + self.box_firmware_size + FIRMWARE_FOOTER_SIZE))
+        if self.is_go3:
+            print('Camera Bluetooth firmware size: ' + str(self.camera_bluetooth_firmware_size))
+            print('Box Bluetooth firmware size: ' + str(self.box_bluetooth_firmware_size))
+        print('Footer size: ' + str(self.footer_size))
+        print('Total size: ' + str(self.camera_firmware_size + self.box_firmware_size + self.camera_bluetooth_firmware_size + self.box_bluetooth_firmware_size + self.footer_size))
 
         self.camera_firmware_filename = read(self.mm,
-                                             self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_CAMERA_FILE_NAME_POSITION,
+                                             self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_FILE_NAME_POSITION,
                                              FIRMWARE_FOOTER_CAMERA_FILE_NAME_SIZE)
         print(self.camera_firmware_filename.decode('utf-8').rstrip('\0'))
         self.camera_firmware_version = read(self.mm,
-                                            self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_CAMERA_VERSION_POSITION,
+                                            self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_VERSION_POSITION,
                                             FIRMWARE_FOOTER_CAMERA_VERSION_SIZE)
         print(self.camera_firmware_version.decode('utf-8').rstrip('\0'))
         self.camera_firmware_footer_md5 = read(self.mm,
-                                               self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_CAMERA_MD5_POSITION,
+                                               self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_MD5_POSITION,
                                                FIRMWARE_FOOTER_CAMERA_MD5_SIZE)
         print(self.camera_firmware_footer_md5.hex())
 
         self.box_firmware_filename = read(self.mm,
-                                          self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION,
+                                          self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION,
                                           FIRMWARE_FOOTER_BOX_FILE_NAME_SIZE)
         print(self.box_firmware_filename.decode('utf-8').rstrip('\0'))
         self.box_firmware_version = read(self.mm,
-                                         self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_BOX_VERSION_POSITION,
+                                         self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_VERSION_POSITION,
                                          FIRMWARE_FOOTER_BOX_VERSION_SIZE)
         print(self.box_firmware_version.decode('utf-8').rstrip('\0'))
         self.box_firmware_footer_md5 = read(self.mm,
-                                            self.file_size - FIRMWARE_FOOTER_SIZE + FIRMWARE_FOOTER_BOX_MD5_POSITION,
+                                            self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_MD5_POSITION,
                                             FIRMWARE_FOOTER_BOX_MD5_SIZE)
         print(self.box_firmware_footer_md5.hex())
+
+        if self.is_go3:
+            self.camera_bluetooth_firmware_filename = read(self.mm,
+                                                 self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_POSITION,
+                                                 FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_SIZE)
+            print(self.camera_bluetooth_firmware_filename.decode('utf-8').rstrip('\0'))
+            self.camera_bluetooth_firmware_version = read(self.mm,
+                                                self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_POSITION,
+                                                FIRMWARE_FOOTER_CAMERA_BLUETOOTH_VERSION_SIZE)
+            print(self.camera_bluetooth_firmware_version.decode('utf-8').rstrip('\0'))
+            self.camera_bluetooth_firmware_footer_md5 = read(self.mm,
+                                                   self.file_size - self.footer_size + FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_POSITION,
+                                                   FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_SIZE)
+            print(self.camera_bluetooth_firmware_footer_md5.hex())
+
+            self.box_bluetooth_firmware_filename = read(self.mm,
+                                              self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_POSITION,
+                                              FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_SIZE)
+            print(self.box_bluetooth_firmware_filename.decode('utf-8').rstrip('\0'))
+            self.box_bluetooth_firmware_version = read(self.mm,
+                                             self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_POSITION,
+                                             FIRMWARE_FOOTER_BOX_BLUETOOTH_VERSION_SIZE)
+            print(self.box_bluetooth_firmware_version.decode('utf-8').rstrip('\0'))
+            self.box_bluetooth_firmware_footer_md5 = read(self.mm,
+                                                self.file_size - self.footer_size + FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_POSITION,
+                                                FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_SIZE)
+            print(self.box_bluetooth_firmware_footer_md5.hex())
 
     def validate(self):
         sections_running_crc32 = bytes(0x0)
@@ -460,7 +567,7 @@ class Firmware:
                     exit(1)
 
         # Check the sizes of the firmwares and the footer add up to the actual file size
-        if self.camera_firmware_size + self.box_firmware_size + FIRMWARE_FOOTER_SIZE != self.file_size:
+        if self.camera_firmware_size + self.box_firmware_size + self.camera_bluetooth_firmware_size + self.box_bluetooth_firmware_size + self.footer_size != self.file_size:
             print('Invalid file size')
             exit(1)
 
@@ -488,9 +595,8 @@ class Firmware:
             print('Invalid firmware header zeros')
             exit(1)
 
-        # Check that the firmware ends with the appropriate signature
-        footer_signature = read(self.mm, self.file_size - len(FIRMWARE_FOOTER_SIGNATURE), len(FIRMWARE_FOOTER_SIGNATURE))
-        if not footer_signature == FIRMWARE_FOOTER_SIGNATURE:
+        # Check that the firmware ends with an appropriate signature
+        if self.is_go2 is False and self.is_go3 is False:
             print('Invalid footer signature')
             exit(1)
 
@@ -511,6 +617,19 @@ class Firmware:
         if self.box_firmware_footer_md5 != box_firmware_footer_md5_calculated:
             print('Invalid box firmware MD5')
             exit(1)
+
+        if self.is_go3 is True:
+            # Check the camera bluetooth firmware MD5
+            camera_bluetooth_firmware_footer_md5_calculated = calculate_md5(self.mm, self.camera_firmware_size + self.box_firmware_size, self.camera_bluetooth_firmware_size)
+            if self.camera_bluetooth_firmware_footer_md5 != camera_bluetooth_firmware_footer_md5_calculated:
+                print('Invalid camera bluetooth firmware MD5')
+                exit(1)
+
+            # Check the box bluetooth firmware MD5
+            box_bluetooth_firmware_footer_md5_calculated = calculate_md5(self.mm, self.camera_firmware_size + self.box_firmware_size + self.camera_bluetooth_firmware_size, self.box_bluetooth_firmware_size)
+            if self.box_bluetooth_firmware_footer_md5 != box_bluetooth_firmware_footer_md5_calculated:
+                print('Invalid box bluetooth firmware MD5')
+                exit(1)
 
         print('Firmware OK!')
 
@@ -559,15 +678,43 @@ class Firmware:
         write(folder + os.sep + 'firmware.header', firmware_header)
 
         # Firmware footer
-        footer = read(self.mm, self.file_size - FIRMWARE_FOOTER_SIZE, FIRMWARE_FOOTER_SIZE)
+        footer = read(self.mm, self.file_size - self.footer_size, self.footer_size)
         write(folder + os.sep + 'firmware.footer', footer)
 
         # Box firmware
         firmware_box = read(self.mm, self.camera_firmware_size, self.box_firmware_size)
         write(folder + os.sep + 'box.bin', firmware_box)
 
+        if self.is_go3:
+            # Camera Bluetooth Firmware
+            firmware_camera_bt = read(self.mm, self.camera_firmware_size + self.box_firmware_size, self.camera_bluetooth_firmware_size)
+            write(folder + os.sep + 'camera_bt.bin', firmware_camera_bt)
+
+            # Box Bluetooth Firmware
+            firmware_box_bt = read(self.mm, self.camera_firmware_size + self.box_firmware_size + self.camera_bluetooth_firmware_size, self.box_bluetooth_firmware_size)
+            write(folder + os.sep + 'box_bt.bin', firmware_box_bt)
+
     def pack(self, folder):
         print('Packing...')
+
+        # Get camera version from footer file
+        footer_file_size = os.path.getsize(folder + os.sep + 'firmware.footer')
+        footer_file = open(folder + os.sep + 'firmware.footer', 'r+b')
+        # Is it a Insta360 GO 2 firmware?
+        footer_file.seek(footer_file_size - FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
+        footer_signature = footer_file.read(FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
+        if footer_signature == FIRMWARE_FOOTER_GO2_SIGNATURE:
+            self.is_go2 = True
+        # Is it a Insta360 GO 3 firmware?
+        footer_file.seek(footer_file_size - FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
+        footer_signature = footer_file.read(FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
+        if footer_signature == FIRMWARE_FOOTER_GO3_SIGNATURE:
+            self.is_go3 = True
+        # Is it none?
+        if self.is_go2 is False and self.is_go3 is False:
+            print('Only Insta360 GO 2 and Insta360 GO 3 cameras are supported')
+            sys.exit(1)
+        footer_file.close()
 
         # Get sections from folder and order them
         self.sections = [f for f in os.listdir(folder) if re.match(r'section_[0-9]+\.bin', f)]
@@ -677,6 +824,33 @@ class Firmware:
         box_footer_size = os.path.getsize(temp_directory + os.sep + 'box.bin')
         box_footer_md5 = calculate_md5(box_file, 0, box_footer_size)
 
+        camera_bluetooth_footer_size = 0
+        camera_bluetooth_footer_md5 = None
+        box_bluetooth_footer_size = 0
+        box_bluetooth_footer_md5 = None
+        if self.is_go3:
+            # Add camera bluetooth firmware
+            print('Adding camera bluetooth firmware...')
+            shutil.copyfile(folder + os.sep + 'camera_bt.bin', temp_directory + os.sep + 'camera_bt.bin')
+            camera_bluetooth_file = open(temp_directory + os.sep + 'camera_bt.bin', 'rb')
+            firmware_file.seek(0, io.SEEK_END)
+            firmware_file.write(camera_bluetooth_file.read())
+
+            # Calculate camera bluetooth firmware MD5 for later in the footer
+            camera_bluetooth_footer_size = os.path.getsize(temp_directory + os.sep + 'camera_bt.bin')
+            camera_bluetooth_footer_md5 = calculate_md5(camera_bluetooth_file, 0, camera_bluetooth_footer_size)
+
+            # Add box bluetooth firmware
+            print('Adding box bluetooth firmware...')
+            shutil.copyfile(folder + os.sep + 'box_bt.bin', temp_directory + os.sep + 'box_bt.bin')
+            box_bluetooth_file = open(temp_directory + os.sep + 'box_bt.bin', 'rb')
+            firmware_file.seek(0, io.SEEK_END)
+            firmware_file.write(box_bluetooth_file.read())
+
+            # Calculate box bluetooth firmware MD5 for later in the footer
+            box_bluetooth_footer_size = os.path.getsize(temp_directory + os.sep + 'box_bt.bin')
+            box_bluetooth_footer_md5 = calculate_md5(box_bluetooth_file, 0, box_bluetooth_footer_size)
+
         # Firmware footer
         print('Adding footer...')
         shutil.copyfile(folder + os.sep + 'firmware.footer', temp_directory + os.sep + 'firmware.footer')
@@ -698,6 +872,23 @@ class Firmware:
         footer_file.seek(FIRMWARE_FOOTER_BOX_MD5_POSITION)
         footer_file.write(box_footer_md5)
 
+        if self.is_go3:
+            # Set camera bluetooth firmware size
+            footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_POSITION)
+            footer_file.write(camera_bluetooth_footer_size.to_bytes(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE, 'little'))
+
+            # Set camera bluetooth firmware MD5
+            footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_POSITION)
+            footer_file.write(camera_bluetooth_footer_md5)
+
+            # Set box bluetooth firmware size
+            footer_file.seek(FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_POSITION)
+            footer_file.write(box_bluetooth_footer_size.to_bytes(FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE, 'little'))
+
+            # Set box bluetooth firmware MD5
+            footer_file.seek(FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_POSITION)
+            footer_file.write(box_bluetooth_footer_md5)
+
         footer_file.close()
 
         footer_file = open(temp_directory + os.sep + 'firmware.footer', 'rb')
@@ -717,7 +908,7 @@ class Firmware:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='insta360-go2-firmware-tool',
-        description='Modify Insta360 GO2 camera firmware',
+        description='Modify Insta360 GO 2 and Insta360 GO 3 camera firmwares',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent('''\
                 Examples:

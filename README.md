@@ -1,12 +1,12 @@
 Description
 ===========
-Unofficial Insta360 GO2 camera firmware tool.
+Unofficial Insta360 GO 2 and Insta360 GO 3 cameras firmware tool.
 
-The GO2 camera uses an Ambarella H22 SoC and the firmware has a very similar structure to other cameras that also use
+The Insta360 GO 2 and Insta360 GO 3 cameras use an Ambarella H22 SoC and the firmware has a very similar structure to other cameras that also use
 Ambarella chips (A2, A7, A9, A12, H2 and others) like the GoPro Hero 3, SJCAM SJ7 and SJ8, Xiaomi Yi and Mi, DJI drones and many more.
 See a more detailed list [here](https://en.wikipedia.org/wiki/List_of_Ambarella_products).
 
-But this firmware is different because it also includes the charge case firmware. A detailed explanation of the firmware structure is described in the [docs](docs/README.md).
+But this firmware is different because it also includes the case firmware. A detailed explanation of the firmware structure is described in the [docs](docs/README.md).
 
 Disclaimer
 ==========
@@ -48,8 +48,11 @@ The output filename can be anything you want (as long as that file does not curr
 
 See the [docs](docs/README.md) for more info.
 
-Insta360 GO2 camera firmware update
-===================================
+Camera firmware update
+======================
+
+Insta360 GO 2
+-------------
 
 * Once you have your modified firmware file make sure you rename it to `InstaGo2FW.pkg`.
 * Connect the box to your computer with a USB-C cable.
@@ -63,3 +66,19 @@ Insta360 GO2 camera firmware update
 * Once connected the screen should show "Camera Firmware Checking" for some time and then both the camera and the box will reset.
 * When both finish resetting connect again the box to the camera pressing the right button.
 * Go to Settings > About > Fw version to see the firmware version.
+
+See the [official support page](https://onlinemanual.insta360.com/go2/en-us/camera/firmware) for more info.
+
+Insta360 GO 3
+-------------
+
+* Once you have your modified firmware file make sure you rename it to `Insta360GO3FW.pkg`.
+* Power on the Action Pod with the camera in and connect it to your computer with a USB-C cable.
+* In your computer the camera should be shown as a normal USB disk drive named `Insta360GO3`.
+* Copy your `Insta360GO3FW.pkg` file to the root of that disk drive.
+* Unmount that disk drive safely. 
+* Disconnect the USB-C cable from the Action Pod to exit the USB Mode. It will automatically power off.
+* Power on GO 3 and the firmware update will start. The indicator light will slowly flash blue.
+* GO 3 will automatically restart once the update is complete.
+
+See the [official support page](https://onlinemanual.insta360.com/go3/en-us/camera/firmware) for more info.

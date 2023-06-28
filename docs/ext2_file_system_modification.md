@@ -5,7 +5,7 @@ If you want to add, remove or edit files in the file system used by the Linux sy
 you have to mount the `section_4.bin` file locally:
 
 ```
-$ python3 main.py unpack --input=InstaGo2FW.pkg --output=firmware_folder
+$ python3 insta360-go-firmware-tool.py unpack --input=InstaGo2FW.pkg --output=firmware_folder
 $ cd firmware_folder
 $ mkdir section_4.ext2
 $ sudo mount -o loop section_4.bin section_4.ext2
@@ -22,7 +22,7 @@ $ sudo umount section_4.ext2
 Pack your modified firmware:
 
 ```
-$ python3 main.py pack --input=firmware_folder --output=InstaGo2FW.pkg
+$ python3 insta360-go-firmware-tool.py pack --input=firmware_folder --output=InstaGo2FW.pkg
 ```
 
 And use it to update your camera firmware.

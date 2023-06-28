@@ -907,8 +907,8 @@ class Firmware:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        prog='insta360-go2-firmware-tool',
-        description='Modify Insta360 GO 2 and Insta360 GO 3 camera firmwares',
+        prog='insta360-go-firmware-tool.py',
+        description='Insta360 GO 2 and Insta360 GO 3 cameras firmware tool',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent('''\
                 Examples:

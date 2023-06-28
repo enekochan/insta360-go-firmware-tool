@@ -22,13 +22,13 @@ Usage
 To validate a firmware file:
 
 ```
-$ python main.py validate --input=InstaGo2FW.pkg
+$ python insta360-go-firmware-tool.py validate --input=InstaGo2FW.pkg
 ```
 
 To unpack a firmware file:
 
 ```
-$ python main.py unpack --input=InstaGo2FW.pkg --output=firmware_folder
+$ python insta360-go-firmware-tool.py unpack --input=InstaGo2FW.pkg --output=firmware_folder
 ```
 
 This will unpack the firmware file to the output folder. Some firmware sections will be processed accordingly too:
@@ -39,7 +39,7 @@ This will unpack the firmware file to the output folder. Some firmware sections 
 To pack a firmware folder into a file:
 
 ```
-$ python main.py pack --input=firmware_folder --output=InstaGo2FW.pkg
+$ python insta360-go-firmware-tool.py pack --input=firmware_folder --output=InstaGo2FW.pkg
 ```
 
 This will use the unpacked firmware data from the input folder to create a valid firmware file.

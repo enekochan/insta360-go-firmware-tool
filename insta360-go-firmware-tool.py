@@ -372,12 +372,12 @@ class Firmware:
     def get_insta360_go_version(self):
         # Is it a Insta360 GO 2 firmware?
         footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
-        if footer_signature == FIRMWARE_FOOTER_GO2_SIGNATURE:
+        if footer_signature[:8] == FIRMWARE_FOOTER_GO2_SIGNATURE[:8]:
             self.is_go2 = True
             self.footer_size = FIRMWARE_FOOTER_GO2_SIZE
         # Is it a Insta360 GO 3 firmware?
         footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
-        if footer_signature == FIRMWARE_FOOTER_GO3_SIGNATURE:
+        if footer_signature[:8] == FIRMWARE_FOOTER_GO3_SIGNATURE[:8]:
             self.is_go3 = True
             self.footer_size = FIRMWARE_FOOTER_GO3_SIZE
         # Is it none?

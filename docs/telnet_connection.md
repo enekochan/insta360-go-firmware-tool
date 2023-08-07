@@ -1,8 +1,8 @@
-Connect with telnet to Insta360 GO2 camera
-==========================================
+Telnet connection
+=================
 
-When turning on the GO2 camera it creates a Wi-Fi AP (access point) you can connect to as if was any other router or similar.
-The name of that access point should be something like `GO2 XXXXXX.OSC` and the password to connect is always `88888888`.
+The Insta360 GO 2 and GO 3 cameras create a Wi-Fi AP (access point) you can connect to as if it was a router.
+The name of that access point should be something like `GO2 XXXXXX.OSC` or `GO 3 XXXXXX.OSC` and the password is always `88888888`.
 
 Once connected the camera will be accessible via the 192.168.42.1 IP address.
 
@@ -32,7 +32,7 @@ root
 Keep the camera on while connected with telnet
 ==============================================
 
-One of the drawbacks of the Insta360 GO2 camera is that it will switch off itself after a maximum of 3 minutes (configurable with the box).
+One of the drawbacks of the Insta360 GO 2 and GO 3 cameras is that they will switch off themselves after a maximum of 3 minutes (configurable with the box).
 This makes you push the box right button from time to time (less than 3 minutes) so you can continue tinkering with the telnet console.
 
 The solution to this is to connect the Insta360 phone app to the camera and leave the app opened in the phone.

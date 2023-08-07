@@ -3,12 +3,12 @@ Firmware structure
 
 Insta360 GO 2 and Insta360 GO 3 have 2 hardware pieces:
 
-* The camera itself with an Ambarella H22 SoC (Quad-Core ARM® Cortex®-A53) and a Sony IMX577-AACK image sensor. Insta360 GO 2 has an AMPAK AP5256 (with a BCM43455 inside) whereas Insta360 GO 3 has an AMPAK AP6256 (with a BCM43456 inside) for Wi-Fi and Bluetooth connectivity.
+* The camera itself with an Ambarella H22 SoC (Quad-Core ARM® Cortex®-A53), an AMPAK AP6256 (with a BCM43456 inside) for Wi-Fi and Bluetooth connectivity and a Sony IMX577-AACK image sensor.
 * The charge case (internally called box that is used to charge, control and storage the camera). Insta360 GO 2 case has a Realtek RTL8762CMF (ARM Cortex-M4) for Wi-Fi and Bluetooth connectivity. 
 
-In the Insta360 GO 2 both have their own firmware, but you download only one file from [Insta360](https://www.insta360.com/download/insta360-go2).
-That's why the Insta360 GO 2 firmware is different from other Insta360 cameras as it has 2 firmwares inside.
-It has the usual header, camera firmware, an MD5 value for the previous data, the box firmware and a footer at the end describing both firmwares.
+The camera and the box both have their own firmware, but you download only one file from Insta360 for the [GO 2](https://www.insta360.com/download/insta360-go2) and the [GO 3](https://www.insta360.com/download/insta360-go3).
+That's why the firmware for Insta360 GO 2 and GO 3 is different from other Insta360 cameras as it has 2 firmwares inside for the GO 2 and 4 for the GO 3.
+It has the usual header, camera firmware, an MD5 value for the previous data, the additional firmwares (the box and the bluetooth modules) and a footer at the end describing all the firmwares.
 
 This is the basic structure of the Insta360 GO 2 firmware as of version 3.10.17.2:
 
@@ -182,7 +182,7 @@ After that MD5 comes the box firmware.
 Camera and box bluetooth firmware
 ---------------------------------
 
-In case of the Insta360 GO 3 the camera and box bluetooth module firmwares come next.
+In case of the Insta360 GO 3 the camera and box bluetooth firmwares come next.
 
 Footer
 ------
@@ -200,7 +200,7 @@ A0E30100                                                                -> 0x000
 496E7374 61436842 6F784657 2E62696E 00000000 00000000 00000000 00000000 -> "InstaChBoxFW.bin                " -> Box firmware name
 302E302E 382E3200 00000000 00000000 00000000 00000000 00000000 00000000 -> "0.0.8.2                         " -> Box firmware version
 A1AF0A85 ADDCBE44 65A01568 391A153D                                     -> 0xA1AF0A85ADDCBE4465A01568391A153D -> MD5 from the beginning of the box firmware up to the beginning of the footer (0x04083E29 to 0x040A21C8)
-57464E49 54584E4F 02000000 00000000                                     -> "WFNITXNO        "                 -> Camera model signature (with 0x0200000000000000 non printable characters after the text)
+57464E49 54584E4F 02000000 00000000                                     -> "WFNITXNO        "                 -> Camera model signature (with 8 non printable characters after the text)
 ```
 
 ![](footer_go2.png)
@@ -224,7 +224,7 @@ F686D88A 27EAFCD1 927D3ECC 2BE8DF64                                     -> 0xF68
 496E7374 61333630 476F3343 61736542 742E6269 6E000000 00000000 00000000 -> "Insta360Go3CaseBt.bin           " -> Box Bluetooth firmware name
 474F3353 455F4341 53455F56 312E342E 34382E35 31000000 00000000 00000000-> "GO3SE_CASE_V1.4.48.51            " -> Box Bluetooth firmware version
 F32A5EFF 1DF52A4C F2CFEB98 83E9A34E                                     -> 0xF32A5EFF1DF52A4CF2CFEB9883E9A34E -> MD5 from
-57464E49 54584E4F 02000000 00000000                                     -> "WFNIUXNO        "                 -> Camera model signature (with 0x0400010000000900 non printable characters after the text)
+57464E49 54584E4F 02000000 00000000                                     -> "WFNIUXNO        "                 -> Camera model signature (with 8 non printable characters after the text)
 ```
 
 ![](footer_go3.png)

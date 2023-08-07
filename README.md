@@ -44,7 +44,7 @@ $ python insta360-go-firmware-tool.py pack --input=firmware_folder --output=Inst
 
 This will use the unpacked firmware data from the input folder to create a valid firmware file.
 
-The output filename can be anything you want (as long as that file does not currently exist) but when uploading it to the camera it always must be named `InstaGo2FW.pkg`.
+The output filename can be anything you want (as long as that file does not currently exist) but when uploading it to the camera it always must be named `InstaGo2FW.pkg` for the GO 2 and `Insta360GO3FW.pkg` for the GO 3.
 
 See the [docs](docs/README.md) for more info.
 

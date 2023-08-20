@@ -2,6 +2,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 import textwrap
 import io
 import mmap
@@ -241,9 +242,10 @@ class RomFs:
             romfs_file_count = read(romfs_mm, ROMFS_FILECOUNT_POSITION, ROMFS_FILECOUNT_SIZE)
             romfs_file_count = int.from_bytes(romfs_file_count, 'little')
             print('ROMFS contains ' + str(romfs_file_count) + ' files')
-            os.mkdir(destiny)
-            for j in range(0, romfs_file_count):
-                file_entry_base_position = (len(ROMFS_MAGIC_NUMBER) + ROMFS_FILECOUNT_SIZE) + j * ROMFS_FILE_ENTRY_SIZE
+            destiny.mkdir()
+            destiny_files_list_file = destiny.with_suffix('.files')
+            for i in range(0, romfs_file_count):
+                file_entry_base_position = (len(ROMFS_MAGIC_NUMBER) + ROMFS_FILECOUNT_SIZE) + i * ROMFS_FILE_ENTRY_SIZE
                 file_name = read(romfs_mm, file_entry_base_position + ROMFS_FILE_FILENAME_POSITION, ROMFS_FILE_FILENAME_SIZE).decode('utf-8').rstrip('\0')
                 # print('Extracting ' + file_name)
                 file_length = int.from_bytes(
@@ -256,24 +258,24 @@ class RomFs:
                 if file_crc32 != file_content_crc32:
                     print('Invalid file CRC32, skipping...')
                     continue
-                write(destiny + os.sep + file_name, file_content)
-                append_line(destiny + '.files', file_name)
+                write(destiny / file_name, file_content)
+                append_line(destiny_files_list_file, file_name)
         romfs.close()
 
     def write_files(self, files_list_file):
         self.remove_files()
         files_file = open(files_list_file, 'r')
         files = files_file.readlines()
-        folder = os.path.dirname(os.path.abspath(files_list_file))
         section_name = os.path.splitext(os.path.basename(files_list_file))[0]
+        folder = Path(os.path.dirname(files_list_file)) / section_name
         for file_name in files:
             file_name = file_name.strip()
             # print(file_name)
-            file = open(folder + os.sep + section_name + os.sep + file_name, 'rb')
+            file = open(folder / file_name, 'rb')
             self.add_file(file_name, file.read())
             file.close()
         files_file.close()
-        self.write(folder + os.sep + section_name + '.bin')
+        self.write(folder.parent / (section_name + '.bin'))
 
     def write(self, output):
         # Check file count is not more than 538
@@ -370,12 +372,12 @@ class Firmware:
             self.fw.close()
 
     def get_insta360_go_version(self):
-        # Is it a Insta360 GO 2 firmware?
+        # Is it an Insta360 GO 2 firmware?
         footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
         if footer_signature[:8] == FIRMWARE_FOOTER_GO2_SIGNATURE[:8]:
             self.is_go2 = True
             self.footer_size = FIRMWARE_FOOTER_GO2_SIZE
-        # Is it a Insta360 GO 3 firmware?
+        # Is it an Insta360 GO 3 firmware?
         footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
         if footer_signature[:8] == FIRMWARE_FOOTER_GO3_SIGNATURE[:8]:
             self.is_go3 = True
@@ -637,75 +639,84 @@ class Firmware:
 
     def unpack(self, folder):
         print('Unpacking...')
-        os.mkdir(folder)
+
+        folder = Path(folder)
+        folder.mkdir()
 
         # Sections from header
         for i in range(0, len(self.sections)):
             print('Exporting section ' + str(i))
+            section_name = 'section_' + str(i)
+            section_bin_filename = section_name + '.bin'
+            section_header_filename = section_name + '.header'
             content = read(self.mm, self.sections[i].start - SECTION_HEADER_SIZE, SECTION_HEADER_SIZE)
-            write(folder + os.sep + 'section_' + str(i) + '.header', content)
+            write(folder / section_header_filename, content)
             content = read(self.mm, self.sections[i].start, int.from_bytes(self.sections[i].length, 'little'))
-            write(folder + os.sep + 'section_' + str(i) + '.bin', content)
+            write(folder / section_bin_filename, content)
             if content.startswith(ROMFS_MAGIC_NUMBER):
                 romfs = RomFs()
-                origin = folder + os.sep + 'section_' + str(i) + '.bin'
-                destiny = folder + os.sep + 'section_' + str(i)
+                origin = folder / section_bin_filename
+                destiny = folder / section_name
                 romfs.extract(origin, destiny)
             elif content.startswith(DTB_MAGIC_NUMBER):
                 print('Detected DTB section...')
-                # args = type('args', (object,), {'extract': True, 'filename': os.getcwd() + os.sep + 'section_' + str(i) + '.bin', 'output_dir': 'dtb'})()
+                # args = type('args', (object,), {'extract': True, 'filename': str(folder / section_bin_filename), 'output_dir': 'dtb'})()
                 # extract_dtb.split(args)
                 if shutil.which('dtc') is not None:
                     print('Unpacking dtb...')
-                    os.system('dtc -q -I dtb -O dts -o - ' + folder + os.sep + 'section_' + str(i) + '.bin' + ' > ' + folder + os.sep + 'section_' + str(i) + '.dts')
+                    section_dts_filename = section_name + '.dts'
+                    os.system('dtc -q -I dtb -O dts -o - ' + str(folder / section_bin_filename) + ' > ' + str(folder / section_dts_filename))
                 else:
                     print('device-tree-compiler is not installed, skipping...')
-            elif content[EXT2_MAGIC_NUMBER_POSITION:EXT2_MAGIC_NUMBER_POSITION+len(EXT2_MAGIC_NUMBER)] == EXT2_MAGIC_NUMBER:
+            elif content[EXT2_MAGIC_NUMBER_POSITION:EXT2_MAGIC_NUMBER_POSITION + len(EXT2_MAGIC_NUMBER)] == EXT2_MAGIC_NUMBER:
                 print('Detected Linux EXT2 filesystem section... ')
                 # if sys.platform == 'linux' or sys.platform == 'linux2':
                 #     print('Mounting...')
-                #     if os.path.exists(folder + os.sep + 'section_' + str(i) + '.ext2'):
-                #         print('section_' + str(i) + '.ext2 folder already exists, mount skipped...')
+                #     section_ext2_folder_name = section_name + '.ext2'
+                #     if (folder / section_ext2_folder_name).exists():
+                #         print(section_ext2_folder_name + ' folder already exists, mount skipped...')
                 #     else:
-                #         os.mkdir(folder + os.sep + 'section_' + str(i) + '.ext2')
-                #         # os.system('sudo mount -o rw,loop ' + 'section_' + str(i) + '.bin ' + folder + os.sep + 'section_' + str(i) + '.ext2')
-                #         mount.mount(folder + os.sep + 'section_' + str(i) + '.bin', folder + os.sep + 'section_' + str(i) + '.ext2', 'ext2', 'rw')
+                #         os.mkdir(folder / section_ext2_folder_name)
+                #         # os.system('sudo mount -o rw,loop ' + str(folder / section_bin_filename) + ' ' + str(folder /section_ext2_folder_name)
+                #         mount.mount(folder / section_bin_filename, folder / section_ext2_folder_name, 'ext2', 'rw')
                 # else:
                 #     print('Non Linux system detected, mount skipped...')
 
         # Firmware header
         firmware_header = read(self.mm, 0, FIRMWARE_HEADER_SIZE)
-        write(folder + os.sep + 'firmware.header', firmware_header)
+        write(folder / 'firmware.header', firmware_header)
 
         # Firmware footer
         footer = read(self.mm, self.file_size - self.footer_size, self.footer_size)
-        write(folder + os.sep + 'firmware.footer', footer)
+        write(folder / 'firmware.footer', footer)
 
         # Box firmware
         firmware_box = read(self.mm, self.camera_firmware_size, self.box_firmware_size)
-        write(folder + os.sep + 'box.bin', firmware_box)
+        write(folder / 'box.bin', firmware_box)
 
         if self.is_go3:
             # Camera Bluetooth Firmware
             firmware_camera_bt = read(self.mm, self.camera_firmware_size + self.box_firmware_size, self.camera_bluetooth_firmware_size)
-            write(folder + os.sep + 'camera_bt.bin', firmware_camera_bt)
+            write(folder / 'camera_bt.bin', firmware_camera_bt)
 
             # Box Bluetooth Firmware
             firmware_box_bt = read(self.mm, self.camera_firmware_size + self.box_firmware_size + self.camera_bluetooth_firmware_size, self.box_bluetooth_firmware_size)
-            write(folder + os.sep + 'box_bt.bin', firmware_box_bt)
+            write(folder / 'box_bt.bin', firmware_box_bt)
 
     def pack(self, folder):
         print('Packing...')
 
+        folder = Path(folder)
+
         # Get camera version from footer file
-        footer_file_size = os.path.getsize(folder + os.sep + 'firmware.footer')
-        footer_file = open(folder + os.sep + 'firmware.footer', 'r+b')
-        # Is it a Insta360 GO 2 firmware?
+        footer_file_size = os.path.getsize(folder / 'firmware.footer')
+        footer_file = open(folder / 'firmware.footer', 'r+b')
+        # Is it an Insta360 GO 2 firmware?
         footer_file.seek(footer_file_size - FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
         footer_signature = footer_file.read(FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
         if footer_signature[:8] == FIRMWARE_FOOTER_GO2_SIGNATURE[:8]:
             self.is_go2 = True
-        # Is it a Insta360 GO 3 firmware?
+        # Is it an Insta360 GO 3 firmware?
         footer_file.seek(footer_file_size - FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
         footer_signature = footer_file.read(FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
         if footer_signature[:8] == FIRMWARE_FOOTER_GO3_SIGNATURE[:8]:
@@ -720,62 +731,69 @@ class Firmware:
         self.sections = [f for f in os.listdir(folder) if re.match(r'section_[0-9]+\.bin', f)]
         self.sections.sort()
 
-        temp_directory = tempfile.mkdtemp()
+        temp_directory = Path(tempfile.mkdtemp())
         total_size = 0
 
         print('Backing up section data...')
         for i in range(0, len(self.sections)):
-            section_file = open(folder + os.sep + self.sections[i], 'rb')
+            section_file = open(folder / self.sections[i], 'rb')
+            section_name = 'section_' + str(i)
+            section_bin_filename = section_name + '.bin'
             if read(section_file, RTOS_MAGIC_NUMBER_POSITION, len(RTOS_MAGIC_NUMBER)) == RTOS_MAGIC_NUMBER:
                 print(self.sections[i] + ': RTOS')
                 # Nothing
             elif read(section_file, ROMFS_MAGIC_NUMBER_POSITION, len(ROMFS_MAGIC_NUMBER)) == ROMFS_MAGIC_NUMBER:
                 print(self.sections[i] + ': ROMFS')
                 romfs = RomFs()
-                romfs.write_files(folder + os.sep + 'section_' + str(i) + '.files')
+                section_files_filename = section_name + '.files'
+                romfs.write_files(folder / section_files_filename)
             elif read(section_file, KERNEL_MAGIC_NUMBER_POSITION, len(KERNEL_MAGIC_NUMBER)) == KERNEL_MAGIC_NUMBER:
                 print(self.sections[i] + ': KERNEL')
                 # Nothing
             elif read(section_file, EXT2_MAGIC_NUMBER_POSITION, len(EXT2_MAGIC_NUMBER)) == EXT2_MAGIC_NUMBER:
                 print(self.sections[i] + ': EXT2')
-                # if (sys.platform == 'linux' or sys.platform == 'linux2') and os.path.exists(folder + os.sep + 'section_' + str(i) + '.ext2'):
+                # section_ext2_folder_name = section_name + '.ext2'
+                # if (sys.platform == 'linux' or sys.platform == 'linux2') and (folder / section_ext2_folder_name).exists():
                 #     print('unmounting ext2')
             elif read(section_file, DTB_MAGIC_NUMBER_POSITION, len(DTB_MAGIC_NUMBER)) == DTB_MAGIC_NUMBER:
                 print(self.sections[i] + ': DTB')
-                if shutil.which('dtc') is not None and os.path.exists(folder + os.sep + 'section_' + str(i) + '.dts'):
+                section_dts_filename = section_name + '.dts'
+                if shutil.which('dtc') is not None and (folder / section_dts_filename).exists():
                     print('Packing dts...')
-                    dtb_original_size = os.path.getsize(folder + os.sep + 'section_' + str(i) + '.bin')
-                    os.system('dtc -q -I dts -O dtb -o - ' + folder + os.sep + 'section_' + str(i) + '.dts' + ' -S ' + str(dtb_original_size) + ' > ' + folder + os.sep + 'section_' + str(i) + '.bin')
+                    dtb_original_size = os.path.getsize(folder / section_bin_filename)
+                    os.system('dtc -q -I dts -O dtb -o - ' + str(folder / section_dts_filename) + ' -S ' + str(dtb_original_size) + ' > ' + str(folder / section_bin_filename))
 
-            shutil.copyfile(folder + os.sep + 'section_' + str(i) + '.bin', temp_directory + os.sep + 'section_' + str(i) + '.bin')
-            shutil.copyfile(folder + os.sep + 'section_' + str(i) + '.header', temp_directory + os.sep + 'section_' + str(i) + '.header')
-            section_size = os.path.getsize(temp_directory + os.sep + 'section_' + str(i) + '.bin')
+            section_header_filename = section_name + '.header'
+            shutil.copyfile(folder / section_bin_filename, temp_directory / section_bin_filename)
+            shutil.copyfile(folder / section_header_filename, temp_directory / section_header_filename)
+            section_size = os.path.getsize(temp_directory / section_bin_filename)
             total_size += section_size + SECTION_HEADER_SIZE
             section_crc32 = calculate_crc32(section_file, 0, section_size)
             section_file.close()
             # Update header CRC32 and size
-            header_file = open(temp_directory + os.sep + 'section_' + str(i) + '.header', 'r+b')
+            header_file = open(temp_directory / section_header_filename, 'r+b')
             header_file.seek(SECTION_HEADER_CRC32_POSITION)
             header_file.write(section_crc32)
             header_file.seek(SECTION_HEADER_LENGTH_POSITION)
             header_file.write(section_size.to_bytes(SECTION_HEADER_LENGTH_SIZE, 'little'))
             header_file.close()
             # Append header and section to firmware
-            header_file = open(temp_directory + os.sep + 'section_' + str(i) + '.header', 'rb')
-            section_data_file = open(temp_directory + os.sep + 'section_' + str(i) + '.bin', 'rb')
-            section_file = open(temp_directory + os.sep + 'section_' + str(i), 'wb')
+            header_file = open(temp_directory / section_header_filename, 'rb')
+            section_data_file = open(temp_directory / section_bin_filename, 'rb')
+            section_file = open(temp_directory / section_name, 'wb')
             section_file.write(header_file.read())
             section_file.write(section_data_file.read())
             section_file.close()
 
         # We start with the original firmware header, and later we'll overwrite the CRC32 and the sections data
         print('Creating firmware...')
-        shutil.copyfile(folder + os.sep + 'firmware.header', self.firmware_path)
+        shutil.copyfile(folder / 'firmware.header', self.firmware_path)
         firmware_file = open(self.firmware_path, 'r+b')
         sections_running_crc32 = bytes(0x0)
         for i in range(0, len(self.sections)):
             print('Adding section {:d} data...'.format(i))
-            section_file = open(temp_directory + os.sep + 'section_' + str(i), 'rb')
+            section_name = 'section_' + str(i)
+            section_file = open(temp_directory / section_name, 'rb')
             firmware_file.seek(0, io.SEEK_END)  # Move to the end to append content
             firmware_file.write(section_file.read())
             print('Updating header info for section {:d}...'.format(i))
@@ -813,15 +831,15 @@ class Firmware:
 
         # Add box firmware
         print('Adding box firmware...')
-        shutil.copyfile(folder + os.sep + 'box.bin', temp_directory + os.sep + 'box.bin')
-        box_file = open(temp_directory + os.sep + 'box.bin', 'rb')
+        shutil.copyfile(folder / 'box.bin', temp_directory / 'box.bin')
+        box_file = open(temp_directory / 'box.bin', 'rb')
         firmware_file.seek(0, io.SEEK_END)
         firmware_file.write(box_file.read())
 
         firmware_file.flush()
 
         # Calculate all box firmware MD5 for later in the footer
-        box_footer_size = os.path.getsize(temp_directory + os.sep + 'box.bin')
+        box_footer_size = os.path.getsize(temp_directory / 'box.bin')
         box_footer_md5 = calculate_md5(box_file, 0, box_footer_size)
 
         camera_bluetooth_footer_size = 0
@@ -831,30 +849,30 @@ class Firmware:
         if self.is_go3:
             # Add camera bluetooth firmware
             print('Adding camera bluetooth firmware...')
-            shutil.copyfile(folder + os.sep + 'camera_bt.bin', temp_directory + os.sep + 'camera_bt.bin')
-            camera_bluetooth_file = open(temp_directory + os.sep + 'camera_bt.bin', 'rb')
+            shutil.copyfile(folder / 'camera_bt.bin', temp_directory / 'camera_bt.bin')
+            camera_bluetooth_file = open(temp_directory / 'camera_bt.bin', 'rb')
             firmware_file.seek(0, io.SEEK_END)
             firmware_file.write(camera_bluetooth_file.read())
 
             # Calculate camera bluetooth firmware MD5 for later in the footer
-            camera_bluetooth_footer_size = os.path.getsize(temp_directory + os.sep + 'camera_bt.bin')
+            camera_bluetooth_footer_size = os.path.getsize(temp_directory / 'camera_bt.bin')
             camera_bluetooth_footer_md5 = calculate_md5(camera_bluetooth_file, 0, camera_bluetooth_footer_size)
 
             # Add box bluetooth firmware
             print('Adding box bluetooth firmware...')
-            shutil.copyfile(folder + os.sep + 'box_bt.bin', temp_directory + os.sep + 'box_bt.bin')
-            box_bluetooth_file = open(temp_directory + os.sep + 'box_bt.bin', 'rb')
+            shutil.copyfile(folder / 'box_bt.bin', temp_directory / 'box_bt.bin')
+            box_bluetooth_file = open(temp_directory / 'box_bt.bin', 'rb')
             firmware_file.seek(0, io.SEEK_END)
             firmware_file.write(box_bluetooth_file.read())
 
             # Calculate box bluetooth firmware MD5 for later in the footer
-            box_bluetooth_footer_size = os.path.getsize(temp_directory + os.sep + 'box_bt.bin')
+            box_bluetooth_footer_size = os.path.getsize(temp_directory / 'box_bt.bin')
             box_bluetooth_footer_md5 = calculate_md5(box_bluetooth_file, 0, box_bluetooth_footer_size)
 
         # Firmware footer
         print('Adding footer...')
-        shutil.copyfile(folder + os.sep + 'firmware.footer', temp_directory + os.sep + 'firmware.footer')
-        footer_file = open(temp_directory + os.sep + 'firmware.footer', 'r+b')
+        shutil.copyfile(folder / 'firmware.footer', temp_directory / 'firmware.footer')
+        footer_file = open(temp_directory / 'firmware.footer', 'r+b')
 
         # Set camera firmware size
         footer_file.seek(FIRMWARE_FOOTER_CAMERA_FIRMWARE_LENGTH_POSITION)
@@ -891,7 +909,7 @@ class Firmware:
 
         footer_file.close()
 
-        footer_file = open(temp_directory + os.sep + 'firmware.footer', 'rb')
+        footer_file = open(temp_directory / 'firmware.footer', 'rb')
 
         # Append footer
         firmware_file.seek(0, io.SEEK_END)

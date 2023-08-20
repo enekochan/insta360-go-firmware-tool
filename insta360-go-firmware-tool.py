@@ -703,12 +703,12 @@ class Firmware:
         # Is it a Insta360 GO 2 firmware?
         footer_file.seek(footer_file_size - FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
         footer_signature = footer_file.read(FIRMWARE_FOOTER_GO2_SIGNATURE_SIZE)
-        if footer_signature == FIRMWARE_FOOTER_GO2_SIGNATURE:
+        if footer_signature[:8] == FIRMWARE_FOOTER_GO2_SIGNATURE[:8]:
             self.is_go2 = True
         # Is it a Insta360 GO 3 firmware?
         footer_file.seek(footer_file_size - FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
         footer_signature = footer_file.read(FIRMWARE_FOOTER_GO3_SIGNATURE_SIZE)
-        if footer_signature == FIRMWARE_FOOTER_GO3_SIGNATURE:
+        if footer_signature[:8] == FIRMWARE_FOOTER_GO3_SIGNATURE[:8]:
             self.is_go3 = True
         # Is it none?
         if self.is_go2 is False and self.is_go3 is False:

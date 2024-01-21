@@ -665,7 +665,7 @@ class Firmware:
                 if shutil.which('dtc') is not None:
                     print('Unpacking dtb...')
                     section_dts_filename = section_name + '.dts'
-                    os.system('dtc -q -I dtb -O dts -o - ' + str(folder / section_bin_filename) + ' > ' + str(folder / section_dts_filename))
+                    os.system('dtc -q -I dtb -O dts -o - "' + str(folder / section_bin_filename) + '" > "' + str(folder / section_dts_filename) + '"')
                 else:
                     print('device-tree-compiler is not installed, skipping...')
             elif content[EXT2_MAGIC_NUMBER_POSITION:EXT2_MAGIC_NUMBER_POSITION + len(EXT2_MAGIC_NUMBER)] == EXT2_MAGIC_NUMBER:
@@ -761,7 +761,7 @@ class Firmware:
                 if shutil.which('dtc') is not None and (folder / section_dts_filename).exists():
                     print('Packing dts...')
                     dtb_original_size = os.path.getsize(folder / section_bin_filename)
-                    os.system('dtc -q -I dts -O dtb -o - ' + str(folder / section_dts_filename) + ' -S ' + str(dtb_original_size) + ' > ' + str(folder / section_bin_filename))
+                    os.system('dtc -q -I dts -O dtb -o - "' + str(folder / section_dts_filename) + '" -S ' + str(dtb_original_size) + ' > "' + str(folder / section_bin_filename) + '"')
 
             section_header_filename = section_name + '.header'
             shutil.copyfile(folder / section_bin_filename, temp_directory / section_bin_filename)

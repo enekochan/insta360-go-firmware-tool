@@ -1,14 +1,14 @@
 Firmware structure
 ==================
 
-Insta360 GO 2 and Insta360 GO 3 have 2 hardware pieces:
+Insta360 GO 2,  Insta360 GO 3 and Insta360 GO 3S have 2 hardware pieces:
 
 * The camera itself with an Ambarella H22 SoC (Quad-Core ARM® Cortex®-A53), an AMPAK AP6256 (with a BCM43456 inside) for Wi-Fi and Bluetooth connectivity and a Sony IMX577-AACK image sensor.
 * The charge case (internally called box that is used to charge, control and storage the camera). Insta360 GO 2 case has a Realtek RTL8762CMF (ARM Cortex-M4) for Wi-Fi and Bluetooth connectivity. 
 
-The camera and the box both have their own firmware, but you download only one file from Insta360 for the [GO 2](https://www.insta360.com/download/insta360-go2) and the [GO 3](https://www.insta360.com/download/insta360-go3).
-That's why the firmware for Insta360 GO 2 and GO 3 is different from other Insta360 cameras as it has 2 firmwares inside for the GO 2 and 4 for the GO 3.
-It has the usual header, camera firmware, an MD5 value for the previous data, the additional firmwares (the box and the bluetooth modules) and a footer at the end describing all the firmwares.
+The camera and the box both have their own firmware, but you download only one file from Insta360 for the [GO 2](https://www.insta360.com/download/insta360-go2), the [GO 3](https://www.insta360.com/download/insta360-go3) and the [GO 3S](https://www.insta360.com/download/insta360-go3s).
+That's why the firmwares for Insta360 GO 2, Insta360 GO 3 and Insta360 GO 3S are different from other Insta360 cameras as they have more than one firmware inside.
+They have the usual header, camera firmware, an MD5 value for the previous data, the additional firmwares (the box and the bluetooth modules) and a footer at the end describing all the firmwares.
 
 This is the basic structure of the Insta360 GO 2 firmware as of version 3.10.17.2:
 
@@ -39,21 +39,47 @@ This is the basic structure of the Insta360 GO 3 firmware as of version 1.0.9:
 0x00000000 -> 0x0000022F (size: 560 bytes, 0x230)             Header
 0x00000230 -> 0x0000032F (size: 256 bytes, 0x100)             Section 0 header
 0x00000330 -> 0x01598ECF (size: 22,645,664 bytes, 0x01598BA0) RTOS
-0x01598ED0 -> 0x015990CF (size: 256 bytes, 0x100)             Section 1 header
-0x015990D0 -> 0x019411CF (size: 3,852,544 bytes, 0x3A8100)    ROMFS with DSP uCode
+0x01598ED0 -> 0x01598FCF (size: 256 bytes, 0x100)             Section 1 header
+0x01598FD0 -> 0x019457CF (size: 3,852,288 bytes, 0x3AC800)    ROMFS with DSP uCode
 0x019457D0 -> 0x019458CF (size: 256 bytes, 0x100)             Section 2 header
 0x019458D0 -> 0x025E48CF (size: 13,234,176 bytes, 0xC9F000)   ROMFS with calibration files and more
 0x025E48D0 -> 0x025E49CF (size: 256 bytes, 0x100)             Section 3 header
-0x025E49D0 -> 0x025A53D7 (size: 5,970,184 bytes, 0x5B1808)    Kernel 4.9.76
+0x025E49D0 -> 0x02B961D7 (size: 5,969,928 bytes, 0x5B1808)    Kernel 4.9.76
 0x02B961D8 -> 0x02B962D7 (size: 256 bytes, 0x100)             Section 4 header
-0x02B962D8 -> 0x050762D7 (size: 38,666,496 bytes, 0x024E0000) Ext2 file system
+0x02B962D8 -> 0x050762D7 (size: 38,666,240 bytes, 0x024E0000) Ext2 file system
 0x050762D8 -> 0x050763D7 (size: 256 bytes, 0x100)             Section 5 header
 0x050763D8 -> 0x0507BE14 (size: 23,101 bytes, 0x5A3D)         DTB (Device Tree Blob)
 0x0507BE15 -> 0x0507BE24 (size: 16 bytes, 0x10)               MD5 (data from 0x0 to 0x0507BE14)
 0x0507BE25 -> 0x0607BE24 (size: 16,777,216 bytes, 0x01000000) Box firmware
 0x0607BE25 -> 0x060A71AC (size: 177,032 bytes, 0x2B388)       Camera Bluetooth firmware
-0x060A71AD -> 0x060B4804 (size: 54,872 bytes, 0x1E3A0)        Box Bluetooth firmware
+0x060A71AD -> 0x060B4804 (size: 54,872 bytes, 0xD658)         Box Bluetooth firmware
 0x060B4805 -> 0x060B4964 (size: 352 bytes, 0x0160)            Footer
+```
+
+In case of the Insta360 GO 3S there are 5 firmwares. Each hardware piece has the main SoC firmware and a bluetooth module firmware and there is also a bluetooth app (or something like that...). You can download the firmware from [Insta360](https://www.insta360.com/download/insta360-go3s).
+
+This is the basic structure of the Insta360 GO 3S firmware as of version 1.0.15:
+
+```
+0x00000000 -> 0x0000022F (size: 560 bytes, 0x230)             Header
+0x00000230 -> 0x0000032F (size: 256 bytes, 0x100)             Section 0 header
+0x00000330 -> 0x01598ECF (size: 23,173,464 bytes, 0x01619958) RTOS
+0x01619C87 -> 0x01619D87 (size: 256 bytes, 0x100)             Section 1 header
+0x01619D88 -> 0x019C7587 (size: 3,856,384 bytes, 0x3AD800)    ROMFS with DSP uCode
+0x019C7588 -> 0x019C7687 (size: 256 bytes, 0x100)             Section 2 header
+0x019C7688 -> 0x028E8687 (size: 15,863,808 bytes, 0xF21000)   ROMFS with calibration files and more
+0x028E8688 -> 0x028E8787 (size: 256 bytes, 0x100)             Section 3 header
+0x028E8788 -> 0x02E99F8F (size: 5,969,928 bytes, 0x5B1808)    Kernel 4.9.76
+0x02E99F90 -> 0x02E9A08F (size: 256 bytes, 0x100)             Section 4 header
+0x02E9A090 -> 0x05B53C8F (size: 46,898,176 bytes, 0x02CB9C00) Ext2 file system
+0x05B53C90 -> 0x05B53D8F (size: 256 bytes, 0x100)             Section 5 header
+0x05B53D90 -> 0x05B597CC (size: 23,101 bytes, 0x5A3D)         DTB (Device Tree Blob)
+0x05B597CD -> 0x05B597DC (size: 16 bytes, 0x10)               MD5 (data from 0x0 to 0x05B597CC)
+0x05B597DD -> 0x06B597DC (size: 16,777,216 bytes, 0x01000000) Box firmware
+0x06B597DD -> 0x06B84918 (size: 176,444 bytes, 0x2B13C)       Camera Bluetooth firmware
+0x06B84919 -> 0x06B84919 (size: 54,976 bytes, 0xD6C0)         Box Bluetooth firmware
+0x06B91FD9 -> 0x06BB938C (size: 160,692 bytes, 0x273B4)       Camera Bluetooth app firmware
+0x06BB938D -> 0x06BB9540 (size: 436 bytes, 0x01B4)            Footer
 ```
 
 Header
@@ -108,6 +134,7 @@ There are 2 ROMFS sections:
   * `orccode.bin`: DSP code.
   * `orcme.bin`: DSP memory data.
   * `default_binary.bin`: DSP data.
+
 * The camera sensor configuration and calibration files among other things:
   * `calib6.bin`
   * `calib13.bin`
@@ -157,6 +184,12 @@ In Insta360 GO 3 the kernel boot arguments are:
 root=/dev/mmcblk0p5 rootfstype=ext2 console=ttyS1 nr_cpus=4 maxcpus=4 swiotlb=1024
 ```
 
+In Insta360 GO 3S the kernel boot arguments are:
+
+```
+root=/dev/mmcblk0p5 rootfstype=ext2 console=ttyS1 nr_cpus=4 maxcpus=4 coherent_pool=2M swiotlb=1024
+```
+
 Ext2
 ----
 
@@ -183,6 +216,11 @@ Camera and box bluetooth firmware
 ---------------------------------
 
 In case of the Insta360 GO 3 the camera and box bluetooth firmwares come next.
+
+Camera bluetooth app firmware
+-----------------------------
+
+In case of the Insta360 GO 3S the is another firmware more.
 
 Footer
 ------
@@ -222,9 +260,35 @@ F841D673 F2331528 4A170645 3D729788                                     -> 0xF84
 F686D88A 27EAFCD1 927D3ECC 2BE8DF64                                     -> 0xF686D88A27EAFCD1927D3ECC2BE8DF64 -> MD5 from
 58D60000                                                                -> 0x0000D658                         -> Box Bluetooth firmware size (54,872 bytes)
 496E7374 61333630 476F3343 61736542 742E6269 6E000000 00000000 00000000 -> "Insta360Go3CaseBt.bin           " -> Box Bluetooth firmware name
-474F3353 455F4341 53455F56 312E342E 34382E35 31000000 00000000 00000000-> "GO3SE_CASE_V1.4.48.51            " -> Box Bluetooth firmware version
+474F3353 455F4341 53455F56 312E342E 34382E35 31000000 00000000 00000000 -> "GO3SE_CASE_V1.4.48.51           " -> Box Bluetooth firmware version
 F32A5EFF 1DF52A4C F2CFEB98 83E9A34E                                     -> 0xF32A5EFF1DF52A4CF2CFEB9883E9A34E -> MD5 from
 57464E49 54584E4F 02000000 00000000                                     -> "WFNIUXNO        "                 -> Camera model signature (with 8 non printable characters after the text)
 ```
 
 ![](footer_go3.png)
+
+The footer for the Insta360 GO 3S includes also another firmware more (436 bytes):
+
+```
+DD97B505                                                                -> 0x05B597DD                         -> Size of the firmware up to the beginning of the box firmware (95,786,973 bytes)
+496E7374 61333630 476F3353 46572E62 696E0000 00000000 00000000 00000000 -> "Insta360Go3SFW.bin              " -> Camera firmware name
+56382E34 2E323000 00000000 00000000 00000000 00000000 00000000 00000000 -> "V8.4.20                         " -> Camera firmware version
+2C0D8EFC 7B776723 0C58DDC1 CF72DB8D                                     -> 0x2C0D8EFC7B7767230C58DDC1CF72DB8D -> MD5 from 0x0 up to the beginning of the box firmware (0x0 to 0x------)
+00000001                                                                -> 0x01000000                         -> Box firmware size (16,777,216 bytes)
+496E7374 61333630 476F3353 43617365 46572E62 696E0000 00000000 00000000 -> "Insta360Go3SCaseFW.bin          " -> Box firmware name
+56382E34 2E313200 00000000 00000000 00000000 00000000 00000000 00000000 -> "V8.4.12                         " -> Box firmware version
+CB5746FE 41A6DDBB E85E44D6 C1B3CC1F                                     -> 0xCB5746FE41A6DDBBE85E44D6C1B3CC1F -> MD5 from the beginning of the box firmware up to the beginning of the footer (0x------ to 0x------)
+3CB10200                                                                -> 0x0002B13C                         -> Camera Bluetooth firmware size (176,444 bytes)
+496E7374 61333630 476F3353 42742E62 696E0000 00000000 00000000 00000000 -> "Insta360Go3SBt.bin              " -> Camera Bluetooth firmware name
+3531332E 392E3533 00000000 00000000 00000000 00000000 00000000 00000000 -> "513.9.53                        " -> Camera Bluetooth firmware version
+5997A2CE DBC99A01 78804FF9 31E60173                                     -> 0x5997A2CEDBC99A0178804FF931E60173 -> MD5 from
+C0D60000                                                                -> 0x0000D6C0                         -> Box Bluetooth firmware size (54,976 bytes)
+496E7374 61333630 476F3353 43617365 42742E62 696E0000 00000000 00000000 -> "Insta360Go3SCaseBt.bin          " -> Box Bluetooth firmware name
+474F3353 455F4341 53455F56 382E302E 342E3100 00000000 00000000 00000000 -> "GO3SE_CASE_V8.0.4.1             " -> Box Bluetooth firmware version
+FE8807A8 324B4B4B 30C60D41 46681285                                     -> 0xFE8807A8324B4B4B30C60D4146681285 -> MD5 from
+B4730200                                                                -> 0x000273B4                         -> Camera Bluetooth app firmware size (160,692 bytes)
+496E7374 61333630 476F3353 42744170 702E6269 6E000000 00000000 00000000 -> "Insta360Go3SBtApp.bin           " -> Camera Bluetooth app firmware name
+474F3353 455F4341 4D455F56 382E302E 342E3300 00000000 00000000 00000000 -> "GO3SE_CAME_V8.0.4.3             " -> Camera Bluetooth app firmware version
+2ED8C9C2 1665E452 773A1CB8 BCE9914E                                     -> 0x2ED8C9C21665E452773A1CB8BCE9914E -> MD5 from
+57464E49 53334F47 05000100 00000F00                                     -> "WFNIS3OG        "                 -> Camera model signature (with 8 non printable characters after the text)
+```

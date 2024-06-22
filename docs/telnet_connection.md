@@ -1,8 +1,8 @@
 Telnet connection
 =================
 
-The Insta360 GO 2 and GO 3 cameras create a Wi-Fi AP (access point) you can connect to as if it was a router.
-The name of that access point should be something like `GO2 XXXXXX.OSC` or `GO 3 XXXXXX.OSC` and the password is always `88888888`.
+The Insta360 GO 2, GO 3 and GO 3S cameras create a Wi-Fi AP (access point) that you can connect to as if it was a router.
+The name of that access point should be something like `GO2 XXXXXX.OSC`,  `GO 3 XXXXXX.OSC` and `GO 3S XXXXXX.OSC` and the password is always `88888888`.
 
 Once connected the camera will be accessible via the 192.168.42.1 IP address.
 

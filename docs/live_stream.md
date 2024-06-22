@@ -1,7 +1,7 @@
 Live video streaming with Insta360 GO 2 and GO 3 cameras
 ========================================================
 
-Insta360 only allows video streaming with GO 2 and GO 3 using WeChat.
+Insta360 only allows video streaming with GO 2, GO 3 and GO 3S using WeChat.
 To sign up on WeChat you need a chinese phone number or another WeChat account to endorse you.
 But what if I don't live in China? If I want to live stream to another platform?
 
@@ -18,7 +18,7 @@ With the help of [`bootup.sh`](boot_commands.md) we can run `/usr/bin/AmbaRTSPSe
 
 Connect you computer to the camera access point Wi-Fi network.
 
-Now start video recording with your GO 2 or GO 3 (otherwise `AmbaRTSPServer` won't work).
+Now start video recording with your GO 2, GO 3 or GO 3S (otherwise `AmbaRTSPServer` won't work).
 
 Access `rtsp://192.168.42.1/liveMain` with any RTSP client, for example VLC (File > Open Network...) or `ffplay`:
 
@@ -26,7 +26,7 @@ Access `rtsp://192.168.42.1/liveMain` with any RTSP client, for example VLC (Fil
 $ ffplay rtsp://192.168.42.1/liveMain
 ```
 
-You should be now seeing a live stream from your GO 2 or GO 3 camera! But with no audio for now :(
+You should be now seeing a live stream from your GO 2, GO 3 or GO 3S camera! But with no audio for now :(
 
 Depending on the video mode you are using while recording/streaming the format and size of the video will be different.
 

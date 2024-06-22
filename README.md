@@ -1,8 +1,8 @@
 Description
 ===========
-Unofficial Insta360 GO 2 and Insta360 GO 3 cameras firmware tool.
+Unofficial Insta360 GO 2, Insta360 GO 3 and Insta360 GO 3S cameras firmware tool.
 
-The Insta360 GO 2 and Insta360 GO 3 cameras use an Ambarella H22 SoC and the firmware has a very similar structure to other cameras that also use
+The Insta360 GO 2, Insta360 GO 3 and Insta360 GO 3S cameras use an Ambarella H22 SoC and the firmware has a very similar structure to other cameras that also use
 Ambarella chips (A2, A7, A9, A12, H2 and others) like the GoPro Hero 3, SJCAM SJ7 and SJ8, Xiaomi Yi and Mi, DJI drones and many more.
 See a more detailed list [here](https://en.wikipedia.org/wiki/List_of_Ambarella_products).
 
@@ -82,3 +82,17 @@ Insta360 GO 3
 * GO 3 will automatically restart once the update is complete.
 
 See the [official support page](https://onlinemanual.insta360.com/go3/en-us/camera/firmware) for more info.
+
+Insta360 GO 3S
+--------------
+
+* Once you have your modified firmware file make sure you rename it to `Insta360GO3SFW.pkg`.
+* Power on the Action Pod with the camera in and connect it to your computer with a USB-C cable.
+* In your computer the camera should be shown as a normal USB disk drive named `Insta360GO3`.
+* Copy your `Insta360GO3SFW.pkg` file to the root of that disk drive.
+* Unmount that disk drive safely. 
+* Disconnect the USB-C cable from the Action Pod to exit the USB Mode. It will automatically power off.
+* Power on GO 3S and the firmware update will start. The indicator light will slowly flash blue.
+* GO 3S will automatically restart once the update is complete.
+
+See the [official support page](https://onlinemanual.insta360.com/go3s/en-us/camera/maintenance/firmware) for more info.

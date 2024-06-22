@@ -1,4 +1,4 @@
-Insta360 GO 2 and GO 3 cameras hacking guides:
+Insta360 GO 2,  GO 3 and GO 3S cameras hacking guides:
 
 * [Firmware Structure](firmware_structure.md)
 * [ext2 file system modification](ext2_file_system_modification.md)

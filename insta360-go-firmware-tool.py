@@ -369,23 +369,23 @@ class Firmware:
     is_go3s = False
     footer_size = 0
     camera_firmware_middle_md5 = None
-    camera_firmware_size = None
+    camera_firmware_size = 0
     camera_firmware_filename = None
     camera_firmware_version = None
     camera_firmware_footer_md5 = None
-    camera_bluetooth_firmware_size = None
+    camera_bluetooth_firmware_size = 0
     camera_bluetooth_firmware_filename = None
     camera_bluetooth_firmware_version = None
     camera_bluetooth_firmware_footer_md5 = None
-    box_firmware_size = None
+    box_firmware_size = 0
     box_firmware_filename = None
     box_firmware_version = None
     box_firmware_footer_md5 = None
-    box_bluetooth_firmware_size = None
+    box_bluetooth_firmware_size = 0
     box_bluetooth_firmware_filename = None
     box_bluetooth_firmware_version = None
     box_bluetooth_firmware_footer_md5 = None
-    camera_bluetooth_app_firmware_size = None
+    camera_bluetooth_app_firmware_size = 0
     camera_bluetooth_app_firmware_filename = None
     camera_bluetooth_app_firmware_version = None
     camera_bluetooth_app_firmware_footer_md5 = None
@@ -760,21 +760,21 @@ class Firmware:
 
         # Box firmware
         firmware_box = read(self.mm, self.camera_firmware_size, self.box_firmware_size)
-        write(folder / 'box.bin', firmware_box)
+        write(folder / self.box_firmware_filename.decode("utf-8").rstrip('\0'), firmware_box)
 
         if self.is_go3 or self.is_go3s:
             # Camera Bluetooth Firmware
             firmware_camera_bt = read(self.mm, self.camera_firmware_size + self.box_firmware_size, self.camera_bluetooth_firmware_size)
-            write(folder / 'camera_bt.bin', firmware_camera_bt)
+            write(folder / self.camera_bluetooth_firmware_filename.decode("utf-8").rstrip('\0'), firmware_camera_bt)
 
             # Box Bluetooth Firmware
             firmware_box_bt = read(self.mm, self.camera_firmware_size + self.box_firmware_size + self.camera_bluetooth_firmware_size, self.box_bluetooth_firmware_size)
-            write(folder / 'box_bt.bin', firmware_box_bt)
+            write(folder / self.box_bluetooth_firmware_filename.decode("utf-8").rstrip('\0'), firmware_box_bt)
 
         if self.is_go3s:
             # Camera Bluetooth App Firmware
             firmware_camera_bt_app = read(self.mm, self.camera_firmware_size + self.box_firmware_size + + self.camera_bluetooth_firmware_size + self.box_bluetooth_firmware_size, self.camera_bluetooth_app_firmware_size)
-            write(folder / 'camera_bt_app.bin', firmware_camera_bt_app)
+            write(folder / self.camera_bluetooth_app_firmware_filename.decode("utf-8").rstrip('\0'), firmware_camera_bt_app)
 
     def pack(self, folder):
         print('Packing...')
@@ -800,6 +800,26 @@ class Firmware:
         if self.is_go2 is False and self.is_go3 is False and self.is_go3s is False:
             print('Only Insta360 GO 2, Insta360 GO 3 and Insta360 GO 3S cameras are supported')
             sys.exit(1)
+
+        # Get the firmware file names from the firmware.footer file
+        footer_file.seek(FIRMWARE_FOOTER_BOX_FILE_NAME_POSITION)
+        self.box_firmware_filename = footer_file.read(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_SIZE)
+        self.box_firmware_filename = self.box_firmware_filename.decode("utf-8").rstrip("\0")
+
+        if self.is_go3 or self.is_go3s:
+            footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_POSITION)
+            self.camera_bluetooth_firmware_filename = footer_file.read(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FILE_NAME_SIZE)
+            self.camera_bluetooth_firmware_filename = self.camera_bluetooth_firmware_filename.decode("utf-8").rstrip("\0")
+
+            footer_file.seek(FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_POSITION)
+            self.box_bluetooth_firmware_filename = footer_file.read(FIRMWARE_FOOTER_BOX_BLUETOOTH_FILE_NAME_SIZE)
+            self.box_bluetooth_firmware_filename = self.box_bluetooth_firmware_filename.decode("utf-8").rstrip("\0")
+
+        if self.is_go3s:
+            footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_APP_FILE_NAME_POSITION)
+            self.camera_bluetooth_app_firmware_filename = footer_file.read(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_APP_FILE_NAME_SIZE)
+            self.camera_bluetooth_app_firmware_filename = self.camera_bluetooth_app_firmware_filename.decode("utf-8").rstrip("\0")
+
         footer_file.close()
 
         # Get sections from folder and order them
@@ -906,57 +926,51 @@ class Firmware:
 
         # Add box firmware
         print('Adding box firmware...')
-        shutil.copyfile(folder / 'box.bin', temp_directory / 'box.bin')
-        box_file = open(temp_directory / 'box.bin', 'rb')
+        shutil.copyfile(folder / self.box_firmware_filename, temp_directory / self.box_firmware_filename)
+        box_file = open(temp_directory / self.box_firmware_filename, 'rb')
         firmware_file.seek(0, io.SEEK_END)
         firmware_file.write(box_file.read())
 
         firmware_file.flush()
 
         # Calculate all box firmware MD5 for later in the footer
-        box_footer_size = os.path.getsize(temp_directory / 'box.bin')
-        box_footer_md5 = calculate_md5(box_file, 0, box_footer_size)
+        box_footer_size = os.path.getsize(temp_directory / self.box_firmware_filename)
+        self.box_firmware_footer_md5 = calculate_md5(box_file, 0, box_footer_size)
 
-        camera_bluetooth_footer_size = 0
-        camera_bluetooth_footer_md5 = None
-        box_bluetooth_footer_size = 0
-        box_bluetooth_footer_md5 = None
-        camera_bluetooth_app_footer_size = 0
-        camera_bluetooth_app_footer_md5 = None
         if self.is_go3 or self.is_go3s:
             # Add camera bluetooth firmware
             print('Adding camera bluetooth firmware...')
-            shutil.copyfile(folder / 'camera_bt.bin', temp_directory / 'camera_bt.bin')
-            camera_bluetooth_file = open(temp_directory / 'camera_bt.bin', 'rb')
+            shutil.copyfile(folder / self.camera_bluetooth_firmware_filename, temp_directory / self.camera_bluetooth_firmware_filename)
+            camera_bluetooth_file = open(temp_directory / self.camera_bluetooth_firmware_filename, 'rb')
             firmware_file.seek(0, io.SEEK_END)
             firmware_file.write(camera_bluetooth_file.read())
 
             # Calculate camera bluetooth firmware MD5 for later in the footer
-            camera_bluetooth_footer_size = os.path.getsize(temp_directory / 'camera_bt.bin')
-            camera_bluetooth_footer_md5 = calculate_md5(camera_bluetooth_file, 0, camera_bluetooth_footer_size)
+            self.camera_bluetooth_firmware_size = os.path.getsize(temp_directory / self.camera_bluetooth_firmware_filename)
+            self.camera_bluetooth_firmware_footer_md5 = calculate_md5(camera_bluetooth_file, 0, self.camera_bluetooth_firmware_size)
 
             # Add box bluetooth firmware
             print('Adding box bluetooth firmware...')
-            shutil.copyfile(folder / 'box_bt.bin', temp_directory / 'box_bt.bin')
-            box_bluetooth_file = open(temp_directory / 'box_bt.bin', 'rb')
+            shutil.copyfile(folder / self.box_bluetooth_firmware_filename, temp_directory / self.box_bluetooth_firmware_filename)
+            box_bluetooth_file = open(temp_directory / self.box_bluetooth_firmware_filename, 'rb')
             firmware_file.seek(0, io.SEEK_END)
             firmware_file.write(box_bluetooth_file.read())
 
             # Calculate box bluetooth firmware MD5 for later in the footer
-            box_bluetooth_footer_size = os.path.getsize(temp_directory / 'box_bt.bin')
-            box_bluetooth_footer_md5 = calculate_md5(box_bluetooth_file, 0, box_bluetooth_footer_size)
+            self.box_bluetooth_firmware_size = os.path.getsize(temp_directory / self.box_bluetooth_firmware_filename)
+            self.box_bluetooth_firmware_footer_md5 = calculate_md5(box_bluetooth_file, 0, self.box_bluetooth_firmware_size)
 
         if self.is_go3s:
             # Add camera bluetooth app firmware
             print('Adding camera bluetooth app firmware...')
-            shutil.copyfile(folder / 'camera_bt_app.bin', temp_directory / 'camera_bt_app.bin')
-            camera_bluetooth_app_file = open(temp_directory / 'camera_bt_app.bin', 'rb')
+            shutil.copyfile(folder / self.camera_bluetooth_app_firmware_filename, temp_directory / self.camera_bluetooth_app_firmware_filename)
+            camera_bluetooth_app_file = open(temp_directory / self.camera_bluetooth_app_firmware_filename, 'rb')
             firmware_file.seek(0, io.SEEK_END)
             firmware_file.write(camera_bluetooth_app_file.read())
 
             # Calculate camera bluetooth app firmware MD5 for later in the footer
-            camera_bluetooth_app_footer_size = os.path.getsize(temp_directory / 'camera_bt_app.bin')
-            camera_bluetooth_app_footer_md5 = calculate_md5(camera_bluetooth_app_file, 0, camera_bluetooth_app_footer_size)
+            self.camera_bluetooth_app_firmware_size = os.path.getsize(temp_directory / self.camera_bluetooth_app_firmware_filename)
+            self.camera_bluetooth_app_firmware_footer_md5 = calculate_md5(camera_bluetooth_app_file, 0, self.camera_bluetooth_app_firmware_size)
 
         # Firmware footer
         print('Adding footer...')
@@ -977,33 +991,33 @@ class Firmware:
 
         # Set box firmware MD5
         footer_file.seek(FIRMWARE_FOOTER_BOX_MD5_POSITION)
-        footer_file.write(box_footer_md5)
+        footer_file.write(self.box_firmware_footer_md5)
 
         if self.is_go3 or self.is_go3s:
             # Set camera bluetooth firmware size
             footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_POSITION)
-            footer_file.write(camera_bluetooth_footer_size.to_bytes(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE, 'little'))
+            footer_file.write(self.camera_bluetooth_firmware_size.to_bytes(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_FIRMWARE_LENGTH_SIZE, 'little'))
 
             # Set camera bluetooth firmware MD5
             footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_MD5_POSITION)
-            footer_file.write(camera_bluetooth_footer_md5)
+            footer_file.write(self.camera_bluetooth_firmware_footer_md5)
 
             # Set box bluetooth firmware size
             footer_file.seek(FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_POSITION)
-            footer_file.write(box_bluetooth_footer_size.to_bytes(FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE, 'little'))
+            footer_file.write(self.box_bluetooth_firmware_size.to_bytes(FIRMWARE_FOOTER_BOX_BLUETOOTH_FIRMWARE_LENGTH_SIZE, 'little'))
 
             # Set box bluetooth firmware MD5
             footer_file.seek(FIRMWARE_FOOTER_BOX_BLUETOOTH_MD5_POSITION)
-            footer_file.write(box_bluetooth_footer_md5)
+            footer_file.write(self.box_bluetooth_firmware_footer_md5)
 
         if self.is_go3s:
             # Set camera bluetooth app firmware size
             footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_APP_FIRMWARE_LENGTH_POSITION)
-            footer_file.write(camera_bluetooth_app_footer_size.to_bytes(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_APP_FIRMWARE_LENGTH_SIZE, 'little'))
+            footer_file.write(self.camera_bluetooth_app_firmware_size.to_bytes(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_APP_FIRMWARE_LENGTH_SIZE, 'little'))
 
             # Set camera bluetooth app firmware MD5
             footer_file.seek(FIRMWARE_FOOTER_CAMERA_BLUETOOTH_APP_MD5_POSITION)
-            footer_file.write(camera_bluetooth_app_footer_md5)
+            footer_file.write(self.camera_bluetooth_app_firmware_footer_md5)
 
         footer_file.close()
 

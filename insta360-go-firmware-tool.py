@@ -262,8 +262,8 @@ class RomFs:
     def remove_files(self):
         self.files.clear()
 
-    def extract(self, origin, destiny):
-        romfs = open(origin, 'r+b')
+    def extract(self, source, target):
+        romfs = open(source, 'r+b')
         romfs_mm = mmap.mmap(romfs.fileno(), 0)
         romfs_mm.seek(0)
         romfs_magic_number = read(romfs_mm, ROMFS_MAGIC_NUMBER_POSITION, len(ROMFS_MAGIC_NUMBER))
@@ -274,8 +274,8 @@ class RomFs:
             romfs_file_count = read(romfs_mm, ROMFS_FILECOUNT_POSITION, ROMFS_FILECOUNT_SIZE)
             romfs_file_count = int.from_bytes(romfs_file_count, 'little')
             print('ROMFS contains ' + str(romfs_file_count) + ' files')
-            destiny.mkdir()
-            destiny_files_list_file = destiny.with_suffix('.files')
+            target.mkdir()
+            target_files_list_file = target.with_suffix('.files')
             for i in range(0, romfs_file_count):
                 file_entry_base_position = (len(ROMFS_MAGIC_NUMBER) + ROMFS_FILECOUNT_SIZE) + i * ROMFS_FILE_ENTRY_SIZE
                 file_name = read(romfs_mm, file_entry_base_position + ROMFS_FILE_FILENAME_POSITION, ROMFS_FILE_FILENAME_SIZE).decode('utf-8').rstrip('\0')
@@ -290,8 +290,8 @@ class RomFs:
                 if file_crc32 != file_content_crc32:
                     print('Invalid file CRC32, skipping...')
                     continue
-                write(destiny / file_name, file_content)
-                append_line(destiny_files_list_file, file_name)
+                write(target / file_name, file_content)
+                append_line(target_files_list_file, file_name)
         romfs.close()
 
     def write_files(self, files_list_file):
@@ -419,6 +419,7 @@ class Firmware:
         if footer_signature[:8] == FIRMWARE_FOOTER_GO3_SIGNATURE[:8]:
             self.is_go3 = True
             self.footer_size = FIRMWARE_FOOTER_GO3_SIZE
+        # Is it an Insta360 GO 3S firmware?
         footer_signature = read(self.mm, self.file_size - FIRMWARE_FOOTER_GO3S_SIGNATURE_SIZE, FIRMWARE_FOOTER_GO3S_SIGNATURE_SIZE)
         if footer_signature[:8] == FIRMWARE_FOOTER_GO3S_SIGNATURE[:8]:
             self.is_go3s = True
@@ -723,9 +724,9 @@ class Firmware:
             write(folder / section_bin_filename, content)
             if content.startswith(ROMFS_MAGIC_NUMBER):
                 romfs = RomFs()
-                origin = folder / section_bin_filename
-                destiny = folder / section_name
-                romfs.extract(origin, destiny)
+                source = folder / section_bin_filename
+                target = folder / section_name
+                romfs.extract(source, target)
             elif content.startswith(DTB_MAGIC_NUMBER):
                 print('Detected DTB section...')
                 # args = type('args', (object,), {'extract': True, 'filename': str(folder / section_bin_filename), 'output_dir': 'dtb'})()
